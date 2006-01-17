@@ -1,0 +1,47 @@
+LiveTree Demo
+=============
+
+To set up and test:
+
+1. Install Ruby On Rails.
+
+2. Create a new rails application:
+
+   $ rails live_tree_demo
+   $ cd live_tree_demo
+    
+3. Uncompress the live_tree distribution inside the new rails application:
+
+   $ tar xzf /path/to/live_tree-0.1.1.tar.gz
+    
+4. Uncompress the live_tree_demo distribution inside the new rails application:
+
+   $ tar xzf /path/to/live_tree_demo-0.1.1.tar.gz
+
+5. Create the databases:
+
+   $ mysql -u root -p
+   Enter password: *******
+   mysql> create database live_tree_demo_development;
+   mysql> create database live_tree_demo_test;
+   mysql> create database live_tree_demo_production;
+   mysql> grant all on live_tree_demo_development.* to 'live_tree_demo'@'localhost' identified by 'live_tree_demo';
+   mysql> grant all on live_tree_demo_test.* to 'live_tree_demo'@'localhost' identified by 'live_tree_demo';
+   mysql> grant all on live_tree_demo_production.* to 'live_tree_demo'@'localhost' identified by 'live_tree_demo';
+   mysql> quit
+    
+6. Create the schema by running db/create_areas.sql:
+
+   $ mysql -u live_tree_demo --password=live_tree_demo live_tree_demo_development
+   mysql> source db/create_areas.sql
+   mysql> quit
+    
+7. Check config/database.yml and make sure the settings are correct.
+
+8. Start the WEBrick server:
+
+   $ ruby script/server
+    
+9. Navigate to:
+
+   http://localhost:3000/areas

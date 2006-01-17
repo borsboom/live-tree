@@ -1,0 +1,79 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head>
+	<title>LiveTree Demo</title>
+	<%= stylesheet_link_tag('style') %>
+	<%= stylesheet_link_tag('live_tree') %>	
+	<%= javascript_include_tag "prototype", "effects" %>
+	<%= javascript_include_tag "live_tree" %>
+	<script type="text/javascript">	
+		function areaTreeOnClickItem(tree, itemId, itemIsLeaf, mapId) {
+			//alert("clicked on " + itemIid);
+			tree.activateItem(itemId);
+			$('map').innerHTML = '<%= escape_javascript(image_tag("live_tree_loading_spinner.gif", :alt => "")) %> Loading map&hellip;'; 
+			new Ajax.Updater('map', '<%= escape_javascript(url_for({ :action => "map" })) %>/' + mapId, {evalScripts:true, asynchronous:true})
+		}		
+	</script>
+    <style type="text/css" media="screen">
+        body {
+            background-color: #ffffff;
+            font-family: "Lucida Grande", "Bitstream Vera Sans", "Verdana";
+            font-size: 13px;
+            color: #000;
+        }
+		.area_tree {
+			border: 5px solid #F00;
+		}
+	</style>
+</head><body>
+
+<h2>LiveTree Demo</h2>
+
+<div style="position:relative;left:0;top:0">
+	<%# <p style="height:25ex;width:900px;overflow:auto;background-color:black;color:white;position:absolute;left:0px;top:450px" id="log"></p> %>
+
+	<div id="map" style="position:absolute;top:0px;left:350px">
+		<%= render :partial => 'areas/map', :locals => { :area => @root_area } %>
+	</div>
+	<div style="width:300px;height:415px">
+		
+		<%= live_tree(:area_tree, {
+			#:css_style => "border: 5px solid #00F",
+			#:id => "foo_tree",
+			#:js_variable_name => "fooBar",
+		
+			#:data_url => { :action => "baz" },
+			#:data_controller => "bar",
+			#:data_action => "foo",
+			#:root_item_id => @root_area.id,
+			#:initial_data => "{id:100,name:'foo'}",
+			:initial_data_root => @root_area,
+			#:initial_data_whole_tree => true,
+			
+			#:css_class => "area_tree",
+			#:expand_root_item => false,
+			#:hide_root_item => true,
+			#:scroll => false,
+			#:preload_items => false,
+			
+			:on_click_item => "areaTreeOnClickItem(this, item.id, item.isLeaf, item.isLeaf ? item.parent.id : item.id)",
+			:allow_click_leaf => false,
+			#:allow_click_branch => false,
+			#:expand_item_on_click => false,
+			#:on_expand_item => 'alert("expanded " + item.id + " " + item.name + " leaf:" + item.isLeaf + " loaded:" + item.isLoaded);',
+			#:on_collapse_item => 'alert("collapsed " + item.id + " " + item.name + " leaf:" + item.isLeaf + " loaded:" + item.isLoaded);',
+			#:on_load_item => 'alert("loaded " + item.id + " " + item.name + " leaf:" + item.isLeaf + " loaded:" + item.isLoaded);',
+		}) %>
+	</div>
+	<p style="margin-top:4em">
+		Test deep links: 
+		&nbsp;
+		<%= link_to_function "Jump to Saanichton", "areaTree.expandParentsOfItem(170);areaTreeOnClickItem(areaTree, 170, true, 24)" %>
+		&nbsp;
+		<%= link_to_function "Jump to Esquimalt", "areaTree.expandItem(26);areaTreeOnClickItem(areaTree, 26, false, 26)" %>
+	</p>
+	<p>
+		For more information, see the <a href="http://www.epiphyte.ca/code/live_tree.html">LiveTree home page</a>.
+	</p>
+</div>
+
+</body></html>

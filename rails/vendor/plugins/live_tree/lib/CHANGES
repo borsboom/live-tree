@@ -1,0 +1,9 @@
+0.1.1 - January 16, 2006
+
+- Packaged code as a plugin.
+- Added +get_item_children_proc+ option.
+- Added +get_item_parent_proc+ option.
+
+0.1 - July 13, 2005
+
+- Initial version

@@ -1,0 +1,23 @@
+<%
+def open_branch(id, leaf, map_id)
+	"" +
+	"areaTreeOnClickItem(areaTree, " + id.to_s + "," + leaf.inspect + ", " + map_id.to_s + ");" +
+	"areaTree.expandItem(" + id.to_s + ")" +
+	""
+end
+-%>
+<% if area.map != nil -%>
+	<div>Map of <%= area.name %>:</div>
+	<div style="border:1px solid black">
+		<%= image_tag 'area_maps/' + area.map.filename, :style => "border-style:none;display:block", :usemap => "#map_" + area.id.to_s, :alt => "Map of " + area.name %>
+		<map name="map_<%= area.id %>">
+			<% for map_area in area.map.map_areas -%>
+				<% if map_area.area.children.size > 0 %>
+					<area href="#" onclick="<%=h open_branch(map_area.area.id, map_area.area.children.size == 0, map_area.area.children.size == 0 ? map_area.area.parent.id : map_area.area.id) %>;return false" shape="<%=h map_area.shape %>" coords="<%= map_area.coords %>" title="<%= map_area.area.name %>" />
+				<% end %>
+			<% end -%>
+		</map>
+	</div>
+<% else -%>
+	No map available for <%= area.name %>.  Maps are only available for <%= link_to_function "Vancouver Island", open_branch(Area::VANCOUVER_ISLAND_ID, false, Area::VANCOUVER_ISLAND_ID) %>.
+<% end -%>
