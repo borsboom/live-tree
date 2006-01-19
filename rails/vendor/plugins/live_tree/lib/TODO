@@ -16,3 +16,4 @@ This list is not necessarily exhaustive.
 * Show tooltips that show full name of truncated items.
 * Ability to handle changing trees: manipulate tree on the client side, and update portions of the tree from the server.
 * Persistance: allow user to leave the page, and come back, and have the same folders open
+* Support non-numeric IDs

@@ -3,13 +3,13 @@ LiveTree Demo
 
 To set up and test:
 
-1. Install Ruby On Rails.
+1. Install Ruby On Rails (if not already installed).
 
 2. Create a new rails application:
 
    $ rails live_tree_demo
    $ cd live_tree_demo
-    
+   
 3. Uncompress the live_tree distribution inside the new rails application:
 
    $ tar xzf /path/to/live_tree-0.1.1.tar.gz
