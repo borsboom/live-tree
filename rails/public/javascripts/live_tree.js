@@ -40,6 +40,7 @@ function LiveTree(id, options) {
 	this.initialData = options.initialData;
 	this.scroll = (options.scroll == null ? true : options.scroll);
 	this.preloadItems = (options.preloadItems == null ? true : options.preloadItems);
+	this.specialEffects = (options.specialEffects == null ? true : options.specialEffects);
 	
 	this.collapsedItemIconHtml = options.collapsedItemIconHtml;
 	this.expandedItemIconHtml = options.expandedItemIconHtml;
@@ -65,6 +66,8 @@ function LiveTree(id, options) {
 	this._updateItemDisplay = null;
 }
 
+LiveTree.DEV_SHOW_PRELOADS = true;
+
 LiveTree.prototype._markItemForUpdateDisplay = function (item) {
 	var tree = this;
 	// This is not very intelligent yet... basically if only one item needs to be updated, that's fine, otherwise the whole tree is updated.
@@ -86,27 +89,30 @@ LiveTree.prototype._getClass = function (suffix) {
 	return result;
 }
 
-LiveTree.prototype._getCollapsedItemIconHtml = function () {
+LiveTree.prototype._getCollapsedItemIconHtml = function (item) {
 	if (this.collapsedItemIconHtml != null) {
 		return this.collapsedItemIconHtml;
 	} else {
-		return '<img src="/images/live_tree_branch_collapsed_icon.gif" alt="&gt;" width="9" height="9" class="' + this._getClass("item_icon") + '" />';
+		//return '<img src="/images/live_tree_branch_collapsed_icon.gif" alt="&gt;" width="9" height="9" class="' + this._getClass("item_icon") + '" />';
+		return '<img src="/images/live_tree_transparent_pixel.gif" alt="&gt;" id="' + this.id + '_item_icon_' + item.id + '" class="' + this._getClass("item_icon") + ' ' + this._getClass("branch_icon_frame_0") + '" />';
 	}
 }
 
-LiveTree.prototype._getExpandedItemIconHtml = function () {
+LiveTree.prototype._getExpandedItemIconHtml = function (item) {
 	if (this.expandedItemIconHtml != null) {
 		return this.expandedItemIconHtml;
 	} else {
-		return '<img src="/images/live_tree_branch_expanded_icon.gif" alt="v" width="9" height="9" class="' + this._getClass("item_icon") + '" />';
+		//return '<img src="/images/live_tree_branch_expanded_icon.gif" alt="v" width="9" height="9" class="' + this._getClass("item_icon") + '" />';
+		return '<img src="/images/live_tree_transparent_pixel.gif" alt="v" id="' + this.id + '_item_icon_' + item.id + '" class="' + this._getClass("item_icon") + ' ' + this._getClass("branch_icon_frame_" + (LiveTree.BRANCH_ICON_FRAMES - 1)) + '" />';
 	}
 }
 
-LiveTree.prototype._getLeafIconHtml = function () {
+LiveTree.prototype._getLeafIconHtml = function (item) {
 	if (this.leafIconHtml != null) {
 		return this.leafIconHtml;
 	} else {
-		return '<img src="/images/live_tree_leaf_icon.gif" alt=" " width="9" height="9" class="' + this._getClass("item_icon") + '" />';
+		//return '<img src="/images/live_tree_leaf_icon.gif" alt=" " width="9" height="9" class="' + this._getClass("item_icon") + '" />';
+		return '<img src="/images/live_tree_transparent_pixel.gif" alt=" " id="' + this.id + '_item_icon_' + item.id + '" class="' + this._getClass("item_icon") + ' ' + this._getClass("leaf_icon") + '" />';
 	}
 }
 
@@ -114,7 +120,7 @@ LiveTree.prototype._getLoadingIconHtml = function () {
 	if (this.loadingIconHtml != null) {
 		return this.loadingIconHtml;
 	} else {
-		return '<img src="/images/live_tree_loading_spinner.gif" alt="[loading]" width="10" height="10" class="' + this._getClass("loading_icon") + '" />';
+		return '<img src="/images/live_tree_loading_spinner.gif" alt="[loading]" class="' + this._getClass("loading_icon") + '" />';
 	}
 }
 
@@ -131,46 +137,6 @@ LiveTree.prototype._getSearchingHtml = function () {
 		return this.searchingHtml;
 	} else {
 		return '<div class="' + this._getClass("searching") + '">' + this._getLoadingIconHtml() + 'Searching for item&hellip;</div>';
-	}
-}
-
-LiveTree.prototype._addItem = function (item, parent) {
-	// If this item ID was already loaded, copy its status from the old data
-	var oldItem = this._itemsIndex[item.id];
-	if (oldItem != null) {
-		item.isLoading = oldItem.isLoading;
-		item.isLoadingBackground = oldItem.isLoadingBackground;
-		item.isExpanded = oldItem.isExpanded;
-	}	
-	this._itemsIndex[item.id] = item;
-
-	// Add some extra properties
-	item.isLeaf = !(item.children == null || item.children.length > 0);
-	item.isLoaded = item.children != null;
-	item.parent = parent;
-	
-	// Replace or add this item in the parent's list of children
-	if (parent.children == null) {
-		parent.children = [item];
-	} else {
-		var found = false;
-		for (var i = 0; i < parent.children.length; i++) {
-			if (parent.children[i].id == item.id) {
-				parent.children[i] = item;
-				found = true;
-				break;
-			}
-		}
-		if (!found) {
-			parent.children[parent.children.length] = item;
-		}
-	}
-	
-	// Now add the item's children as well
-	if (item.children != null) {
-		for (var i = 0; i < item.children.length; i++) {
-			this._addItem(item.children[i], item);
-		}
 	}
 }
 
@@ -209,10 +175,12 @@ LiveTree.prototype._startPreloads = function (item) {
 	}
 	var didLoad = false;
 	if (doLoad) {
-		//alert("preloading children of " + item.id);
+		//alert("XXX preloading children of " + item.id);
 		tree._preloadCount++;
 		tree._requestItem(item.id, 3, tree._onPreloadItemReceived.bind(tree));	
-		tree._markItemForUpdateDisplay(item);
+		if (LiveTree.DEV_SHOW_PRELOADS) {
+			tree._markItemForUpdateDisplay(item);
+		}
 		didLoad = true;
 	} else {
 		for (var i = 0; i < item.children.length; i++) {
@@ -228,87 +196,29 @@ LiveTree.prototype._startPreloads = function (item) {
 	return didLoad;
 }
 
-LiveTree.prototype._handleReceivedItem = function (item, requestOptions) {
+LiveTree.prototype._stopLoading = function () {
 	var tree = this;
-
-	// Find item's parent
-	var parent = null;
-	if (requestOptions.includeParents) {
-		// The response includes the desired item's parents, but we don't want to over-write
-		// data that is already there (since it may include other children deeper down), so 
-		// go down the tree until we find an item that hasn't been loaded before (or we get to the
-		// requested item)
-		var newParent = tree._getItem(item.id).parent;
-		while (true) {
-			// since we included parents, there should only be a single child with children, so find that one
-			var child = null;
+	function recurse(item) {
+		if (item.isLoading) {
+			item.isLoading = false;
+			item.isExpanded = false;
+		}		
+		if (item.children != null) {
 			for (var i = 0; i < item.children.length; i++) {
-				if (item.children[i].children != null && item.children[i].children.length > 0) {
-					if (child != null) {
-						alert("LiveTree error: didn't expect multiple children with children while iterating through parents");
-						return;
-					}
-					child = item.children[i];					
-				}
+				recurse(item.children[i]);
 			}
-			if (child == null || tree._getItem(child.id) == null) {
-				break;
-			}
-			newParent = item;
-			item = child;
-		}
-		parent = tree._getItem(newParent.id);
-	} else {
-		// First, check if root is the parent
-		if (tree._root.children == null) {
-			// ... which is always the case if the root has no children, since that means nothing has been loaded yet
-			parent = tree._root;
-		} else {
-			for (var i = 0; i < tree._root.children.length; i++) {
-				if (item.id == tree._root.children[i].id) {
-					parent = tree._root;
-					break;
-				}
-			}
-		}
-		// Otherwise, it must have been loaded before, so get the old parent
-		if (parent == null) {
-			var oldItem = tree._itemsIndex[item.id];
-			if (oldItem == null) {
-				alert("LiveTree error: attempt to load item of unknown parentage");
-				return false;
-			}
-			parent = oldItem.parent;
 		}
 	}
-	
-	// Now add the item to its parent
-	tree._addItem(item, parent);
-	//alert(ekb_inspect(tree._root));
-	tree._markItemForUpdateDisplay(parent);
-	
-	if (tree.onLoadItem != null) {
-		tree.onLoadItem(item);
-	}
-	return true;
+	recurse(tree._root);
+	tree._markItemForUpdateDisplay(tree._root);
+	tree._searchCount = 0;
+	tree._preloadCount = 0;
+	tree._updateDisplay();
 }
 
-LiveTree.prototype._onItemResponse = function (request, onItemCallback, requestOptions) {
-	var tree = this;
-	if (requestOptions.includeParents) {
-		tree._searchCount--;
-	}
-	var item;
-	try {
-		eval("item = " + request.responseText);
-	} catch (e) {
-		alert("LiveTree error: bad items data from server: " + e);
-		return;
-	}
-	var handled = tree._handleReceivedItem(item, requestOptions);
-	if (handled) {
-		onItemCallback(item, requestOptions);
-	}	
+LiveTree.prototype._onItemFailure = function (request) {
+	alert("LiveTree error: could not get data from server: HTTP error: " + request.status);
+	this._stopLoading();
 }
 
 LiveTree.prototype._requestItem = function (itemId, depth, onItemCallback, options) {
@@ -317,10 +227,6 @@ LiveTree.prototype._requestItem = function (itemId, depth, onItemCallback, optio
 		options = {};
 	}
 	var url = tree.dataUrl;
-	if (url == null) {
-		alert("LiveTree error: no data URL provided");
-		return false;
-	}
 	var requestOptions = new Object();
 	var delim = "?";
 	if (itemId != null) {
@@ -339,26 +245,35 @@ LiveTree.prototype._requestItem = function (itemId, depth, onItemCallback, optio
 		url += delim + "include_parents=1&root_item_id=" + tree.rootItemId;
 		tree._searchCount++;
 	}
-	new Ajax.Request(url, {onComplete:function (request) { tree._onItemResponse(request, onItemCallback, requestOptions) }, evalScripts:true, asynchronous:true});
+	// XXX: onSuccess/onFailure doesn't work in Prototype as released
+	new Ajax.Request(url, {onSuccess: function (request) { tree._onItemResponse(request, onItemCallback, requestOptions) }, onFailure: tree._onItemFailure.bind(tree), evalScripts:true, asynchronous:true, method:"get"});
 	return true;
 }
 
 LiveTree.prototype._onExpandItemReceived = function (item, requestOptions) {
 	var tree = this;
+	//alert("XXX _onExpandItemReceived item.id=" + item.id);
 	item.isLoading = false;
+	tree._markItemForUpdateDisplay(item);
 	tree._startPreloads();
 	tree._updateDisplay();	
 }
 
 LiveTree.prototype._onPreloadItemReceived = function (item, requestOptions) {
 	var tree = this;
+	if (tree._preloadCount <= 0) {
+		return;
+	}
+	//alert("XXX got preload item");
 	tree._preloadCount--;
 	for (var i = 0; i < item.children.length; i++) {
 		item.children[i].isLoading = false;		
 	}
-	tree._markItemForUpdateDisplay(item);
 	tree._startPreloads();
-	tree._updateDisplay();	
+	if (LiveTree.DEV_SHOW_PRELOADS) {
+		tree._markItemForUpdateDisplay(item);
+		tree._updateDisplay();	
+	}
 }
 
 LiveTree.prototype._onClickExpand = function (item) {
@@ -405,89 +320,234 @@ LiveTree.prototype._getItem = function (itemId) {
 	return this._itemsIndex[itemId];
 }
 
-LiveTree.prototype._getItemElement = function (itemId) {
-	return $(this.id + "_item_" + itemId);
+LiveTree.prototype._getItemElementId = function (itemId) {
+	return this.id + "_item_" + itemId;
 }
 
-LiveTree.prototype._displayItem = function (item, isRoot) {
+LiveTree.prototype._getItemElement = function (itemId) {
+	return $(this._getItemElementId(itemId));
+}
+
+LiveTree.prototype._isRootItem = function (item) {
 	var tree = this;
-	var elem;
-	if (isRoot) {
-		elem  = $(tree.id + "_root");
+	return item == tree._root || (tree.hideRootItem && item == tree._root.children[0]);
+}
+
+LiveTree.prototype._getChildrenListElem = function (item) {
+	var tree = this;
+	if (tree._isRootItem(item)) {
+		return $(tree.id + "_root");
 	} else {
-		elem = tree._getItemElement(item.id);
+		return $(tree.id + "_children_list_" + item.id);
 	}
+}
+
+LiveTree.BRANCH_ICON_FRAMES = 7;
+
+LiveTree.prototype._branchIconAnim = function (item, frame, direction, prevClass) {
+	var tree = this;
+	if (frame < LiveTree.BRANCH_ICON_FRAMES && frame >= 0) {
+		var elem = $(tree.id + "_item_icon_" + item.id);
+		if (prevClass) {
+			Element.removeClassName(elem, prevClass);
+		}
+		var className = tree._getClass("branch_icon_frame_" + frame);
+		Element.addClassName(elem, className);
+		var f = function () {
+			tree._branchIconAnim(item, frame + direction, direction, className);
+		}
+		window.setTimeout(f, 100);	
+	} else {
+		
+	}
+}
+
+LiveTree.prototype._renderItemHeading = function (item) {
+	var tree = this;
 	var html = '';
-	if (!isRoot) {
-		if (!item.isLeaf) {
-			if (item.isExpanded) {
-				html += '<a href="#" id="' + tree.id + '_branch_collapse_link_' + item.id + '" class="' + this._getClass("branch_collapse_link") + '">'; {
-					html += tree._getExpandedItemIconHtml();
-				} html += '</a>';
+	if (!item.isLeaf) {
+		html += '<a href="#" id="' + tree.id + '_branch_expand_collapse_link_' + item.id + '" class="' + this._getClass("branch_expand_collapse_link") + '">';
+		if (item.isExpanded) {
+			if (tree.specialEffects && !item.expandedVisible) {
+				html += tree._getCollapsedItemIconHtml(item);
 			} else {
-				html += '<a href="#" id="' + tree.id + '_branch_expand_link_' + item.id + '" class="' + this._getClass("branch_expand_link") + '">'; {
-					html += tree._getCollapsedItemIconHtml();
-				} html += '</a>';
-			}
-			if (item.isLoading && !item.isLoadingBackground) {
-				html += tree._getLoadingIconHtml();
+				html += tree._getExpandedItemIconHtml(item);
 			}
 		} else {
-			html += tree._getLeafIconHtml();
+			if (tree.specialEffects && item.expandedVisible) {
+				html += tree._getExpandedItemIconHtml(item);
+			} else {
+				html += tree._getCollapsedItemIconHtml(item);
+			}
 		}
-		var item_link_exists = false;
-		var extraNameClass = "";
-		if (item.id == tree._activeItemId) {
-			extraNameClass = " " + this._getClass("active_item_name");
+		html += '</a>';
+		if (item.isLoading && !item.isLoadingBackground) {
+			html += tree._getLoadingIconHtml();
 		}
-		var name_html = '<span id="' + tree.id + '_item_name_' + item.id + '" class="' + this._getClass("item_name") + extraNameClass + '">' + item.name + '</span>';
-		if ((tree.onClickItem != null && ((tree.allowClickLeaf && item.isLeaf) || (tree.allowClickBranch && !item.isLeaf))) ||
-				(tree.expandItemOnClick && !item.isLeaf && !item.isExpanded)) {
-			name_html = '<a href="#" id="' + tree.id + '_item_link_' + item.id + '" class="' + this._getClass("item_link") + '">' + name_html + '</a>';
-			item_link_exists = true;
-		}
-		//name_html = "(" + item.id + ") " + name_html;
-		html += name_html;
-		//if (item.isLoading && item.isLoadingBackground) {
-		//	html += " " + tree._getLoadingIconHtml();
-		//}
+	} else {
+		html += tree._getLeafIconHtml(item);
 	}
-	if (item.isExpanded && item.children != null) {
-		var childrenListId;
-		if (isRoot) {
-			childrenListId = tree.id + '_children_list_root';
+	var itemLinkExists = false;
+	var extraNameClass = "";
+	if (item.id == tree._activeItemId) {
+		extraNameClass = " " + this._getClass("active_item_name");
+	}
+	var name_html = '<span id="' + tree.id + '_item_name_' + item.id + '" class="' + this._getClass("item_name") + extraNameClass + '">' + item.name + '</span>';
+	if ((tree.onClickItem != null && ((tree.allowClickLeaf && item.isLeaf) || (tree.allowClickBranch && !item.isLeaf))) ||
+			(tree.expandItemOnClick && !item.isLeaf && !item.isExpanded)) {
+		name_html = '<a href="#" id="' + tree.id + '_item_link_' + item.id + '" class="' + this._getClass("item_link") + '">' + name_html + '</a>';
+		itemLinkExists = true;
+	}
+	name_html = "(" + item.id + ") " + name_html; //XXX
+	html += name_html;
+	if (LiveTree.DEV_SHOW_PRELOADS) {
+		if (item.isLoading && item.isLoadingBackground) {
+			html += " " + tree._getLoadingIconHtml();
+		}
+	}
+	$(tree.id + "_item_heading_" + item.id).innerHTML = html;
+	if (!item.isLeaf) {
+		if (item.isExpanded) {
+			$(tree.id + '_branch_expand_collapse_link_' + item.id).onclick = function () { tree._onClickCollapse(item); return false }		
+			if (!item.expandedVisible && tree.specialEffects) {
+				tree._branchIconAnim(item, 0, 1);
+			}			
 		} else {
-			childrenListId = tree.id + '_children_list_' + item.id;
+			$(tree.id + '_branch_expand_collapse_link_' + item.id).onclick = function () { tree._onClickExpand(item); return false }
+			if (item.expandedVisible && tree.specialEffects) {
+				tree._branchIconAnim(item, LiveTree.BRANCH_ICON_FRAMES - 1, -1);
+			}
 		}
-		if (!isRoot) {
-			html += '<ul id="' + childrenListId + '" class="' + this._getClass("branch") + '">';
+		item.expandedVisible = item.isExpanded;
+	}
+	if (itemLinkExists) {
+		$(tree.id + '_item_link_' + item.id).onclick = function() { tree._onClickItem(item); return false }
+	}
+}
+
+LiveTree.prototype._hideItemChildren = function (item) {
+	var tree = this;
+	for (var i = 0; i < item.children.length; i++) {
+		var child = item.children[i];
+		var elem = tree._getItemElement(child.id);
+		if (elem) {
+			$(tree.id).removeChild(elem);
+			if (child.isLoaded) {
+				tree._hideItemChildren(child);
+			}
 		}
-		for (var i = 0; i < item.children.length; i++) {
+	}
+	item.childrenVisible = false;
+}
+
+LiveTree.prototype._afterFinishSlideDown = function (effect) {
+	var tree = this;
+	var slideElem = $(tree.id + "_slide");
+	slideElem.innerHTML = "";
+	tree._updateItemChildren(effect.options._liveTreeItem, slideElem, effect.options._liveTreeIndentLevel, $(tree.id));
+	$(tree.id).removeChild(slideElem);		
+	tree.slideInProgress = false;
+	tree._markItemForUpdateDisplay(effect.options._liveTreeItem);
+	tree._updateDisplay();
+}
+
+LiveTree.prototype._afterFinishSlideUp = function (effect) {
+	var tree = this;
+	$(tree.id).removeChild($(tree.id + "_slide"));
+	tree.slideInProgress = false;
+	tree._markItemForUpdateDisplay(effect.options._liveTreeItem);
+	tree._updateDisplay();
+}
+
+LiveTree.prototype._updateItemChildren = function (item, afterElem, indentLevel, containerElem) {
+	var tree = this;	
+	
+	function doUpdate() {
+		for (var i = 0; i < item.children.length; i++) {	
 			var child = item.children[i];
-			html += '<li id="' + tree.id + '_item_' + child.id + '" class="' + this._getClass("item") + '"></li>';
+			var elem = tree._getItemElement(child.id);
+			if (elem == null) {
+				var html = "";
+				html += '<div id="' + tree.id + '_item_' + child.id + '" class="' + tree._getClass("item") + '">';
+				for (var j = 0; j < indentLevel; j++) {
+					html += '<div class="' + tree._getClass("item_indent") + '">';
+				}
+				html += '<span id="' + tree.id + '_item_heading_' + child.id + '" class="' + tree._getClass("item_heading") + '"></span>';
+				for (var j = 0; j < indentLevel; j++) {
+					html += '</div>';
+				}
+				html += '</div>';
+				new Insertion.After(afterElem, html);
+				elem = tree._getItemElement(child.id);
+			}
+			tree._renderItemHeading(child);
+			afterElem = elem;
+			if (child.isLoaded) {
+				afterElem = tree._updateItemChildren(child, afterElem, indentLevel + 1, containerElem);
+			}
 		}		
-		if (!isRoot) {
-			html += '</ul>';	
-		}
 	}
-	elem.innerHTML = html;	
-	if (!isRoot) {
-		if (!item.isLeaf) {
-			if (item.isExpanded) {
-				$(tree.id + '_branch_collapse_link_' + item.id).onclick = function () { tree._onClickCollapse(item); return false }		
-			} else {
-				$(tree.id + '_branch_expand_link_' + item.id).onclick = function () { tree._onClickExpand(item); return false }
+	
+	function doSlide(slideClass, afterFinish) {
+		var html = "";
+		html += '<div id="' + tree.id + '_slide" style="position:relative"><div>';
+		html += '<div id="' + tree.id + '_slide_root"></div>';
+		html += '</div></div>';
+		new Insertion.After(afterElem, html);
+		containerElem = $(tree.id + "_slide").firstChild;
+		afterElem = $(tree.id + "_slide_root");
+		tree.slideInProgress = true;
+		doUpdate();
+		new slideClass(tree.id + "_slide", { afterFinish: afterFinish, _liveTreeItem: item, _liveTreeIndentLevel: indentLevel });
+	}
+	
+	if (!item.isExpanded) {
+		if (item.childrenVisible && tree.specialEffects && !tree.slideInProgress) {
+			tree._hideItemChildren(item);
+			doSlide(Effect.SlideUp, tree._afterFinishSlideUp.bind(tree));
+		} else {
+			tree._hideItemChildren(item);
+		}
+	} else {		
+		if (!item.childrenVisible && tree.specialEffects && !tree.slideInProgress) {
+			doSlide(Effect.SlideDown, tree._afterFinishSlideDown.bind(tree));
+		} else {
+			doUpdate();
+		}		
+		item.childrenVisible = true;
+	}
+	return afterElem;
+}
+
+LiveTree.prototype._updateDisplay = function () {
+	var tree = this;
+	if (tree._searchCount > 0) {
+		Element.show(tree.id + "_searching");
+	} else {
+		Element.hide(tree.id + "_searching");
+	}
+	var updateItem = tree._updateItemDisplay;	
+	if (updateItem != null) {
+		tree._updateItemDisplay = null;
+		if (tree._isRootItem(updateItem)) {
+			if (tree.hideRootItem) {
+				updateItem = tree._root.children[0];
+			}
+			tree._updateItemChildren(updateItem, $(tree.id + "_root"), 0, $(tree.id));
+		} else {
+			tree._renderItemHeading(updateItem);
+			var indentLevel = 0;
+			var parentItem = updateItem;
+			while (!tree._isRootItem(parentItem)) {
+				indentLevel++;
+				parentItem = parentItem.parent;
+			}
+			if (updateItem.isLoaded) {
+				tree._updateItemChildren(updateItem, tree._getItemElement(updateItem.id), indentLevel, $(tree.id));
 			}
 		}
-		if (item_link_exists) {
-			$(tree.id + '_item_link_' + item.id).onclick = function() { tree._onClickItem(item); return false }
-		}
 	}
-	if (item.isExpanded && item.children != null) {
-		for (var i = 0; i < item.children.length; i++) {
-			tree._displayItem(item.children[i], false);
-		}
-	}
+	tree._checkScrollOnLoad();
 }
 
 LiveTree.prototype._checkScrollOnLoad = function () {
@@ -511,43 +571,6 @@ LiveTree.prototype._checkScrollOnLoad = function () {
 		tree.scrollToItem(item.id);
 		tree._scrollToItemIdOnLoad = null;		
 	}
-}
-
-LiveTree.prototype._updateDisplay = function () {
-	var tree = this;
-	if (tree._searchCount > 0) {
-		Element.show(tree.id + "_searching");
-	} else {
-		Element.hide(tree.id + "_searching");
-	}
-	var updateItem = tree._updateItemDisplay;	
-	if (updateItem != null) {
-		tree._updateItemDisplay = null;
-		var html = "";
-		var isRoot = false;
-		if (updateItem == tree._root || (tree.hideRootItem && updateItem == tree._root.children[0])) {
-			if (tree.hideRootItem) {
-				updateItem = tree._root.children[0];
-			}				
-			isRoot = true;
-		}
-		tree._displayItem(updateItem, isRoot);
-	}
-	tree._checkScrollOnLoad();
-}
-
-LiveTree.prototype._onInitialItemReceived = function () {
-	var tree = this;
-	this.rootItemId = tree._root.children[0].id;
-	if (tree.hideRootItem) {
-		//tree._root = tree._root.children[0];
-		tree._expandItem(tree._root.children[0]);
-	} else if (tree.expandRootItem) {
-		tree._expandItem(tree._root.children[0]);
-	}
-	tree._root.isExpanded = true;
-	tree._markItemForUpdateDisplay(tree._root);
-	tree._startPreloads();	
 }
 
 LiveTree.prototype._getElementPosition = function (destinationLink) {
@@ -673,6 +696,7 @@ LiveTree.prototype.expandItem = function (itemId) {
 
 LiveTree.prototype._onExpandParentsOfItemReceived = function (item, requestOptions) {
 	var tree = this;
+	//alert("XXX _onExpandParentsOfItemReceived item.id=" + item.id);
 	var requestedItem = tree._getItem(requestOptions.itemId);
 	tree._expandItem(requestedItem.parent);
 	tree._startPreloads();
@@ -724,21 +748,102 @@ LiveTree.prototype.getHtml = function() {
 	}
 	html += '>';
 	html += '<div id="' + tree.id + '_searching" style="display:none">' + tree._getSearchingHtml() + '</div>';
-	html += '<ul id="' + tree.id + '_root" class="' + tree._getClass("root") + '">' + tree._getLoadingTreeHtml() + '</ul>'
+	html += '<div id="' + tree.id + '_loading">' + tree._getLoadingTreeHtml() + '</div>';
+	html += '<div id="' + tree.id + '_root"></div>';
 	html += '</div>';
 	return html;
+}
+
+
+LiveTree.prototype._setupNewItemChildren = function (item) {
+	var tree = this;
+	if (item.children != null) {
+		for (var i = 0; i < item.children.length; i++) {
+			var child = item.children[i];
+			child.isLeaf = !(child.children == null || child.children.length > 0);
+			child.isLoaded = child.children != null;
+			child.parent = item;
+			tree._itemsIndex[child.id] = child;
+			tree._setupNewItemChildren(child);
+		}
+	}
+}
+
+LiveTree.prototype._addNewItems = function (newItem) {
+	var tree = this;
+	var oldItem = tree._getItem(newItem.id);
+	if (newItem.children != null && oldItem != null) {
+		if (!oldItem.isLoaded) {		
+			// Old item has been seen, but its children were not loaded.
+			// New item does have children, so add the children to the old item and flag it as as loaded.
+			oldItem.children = newItem.children;
+			tree._setupNewItemChildren(oldItem);
+			oldItem.isLoaded = true;
+		} else {
+			// Item is already in the tree and has loaded, so recurse to new item's children
+			for (var i = 0; i < newItem.children.length; i++) {
+				tree._addNewItems(newItem.children[i]);
+			}
+		}
+	}
+	return oldItem;
+}
+
+LiveTree.prototype._onItemResponse = function (request, onItemCallback, requestOptions) {
+	var tree = this;
+	if (requestOptions.includeParents && tree._searchCount > 0) {
+		tree._searchCount--;
+	}
+	var item;
+	try {
+		eval("item = " + request.responseText);
+	} catch (e) {
+		alert("LiveTree error: cannot parse data from server: " + e);
+		tree._stopLoading();
+		return;
+	}
+	
+	if (requestOptions.initialRequest) {
+		tree._handleInitialItem(item);
+	} else {	
+		var oldItem = tree._addNewItems(item);
+		if (oldItem == null) {
+			alert("LiveTree error: cannot add received item to tree");
+			tree._stopLoading();	
+		} else {
+			//alert("XXX _onItemResponse calling onItemCallback");
+			onItemCallback(oldItem, requestOptions);
+		}
+	}
+}
+
+LiveTree.prototype._onInitialItemReceived = function () {
+	var tree = this;
+	this.rootItemId = tree._root.children[0].id;
+	Element.hide($(tree.id + "_loading"));
+	if (tree.hideRootItem || tree.expandRootItem) {
+		tree._expandItem(tree._root.children[0]);
+	}
+	tree._root.isExpanded = true;
+	tree._markItemForUpdateDisplay(tree._root);
+	tree._startPreloads();
+	tree._updateDisplay();		
+}
+
+LiveTree.prototype._handleInitialItem = function (item) {
+	var tree = this;
+	tree._root.children = [item];
+	tree._root.isLoaded = true;
+	tree._setupNewItemChildren(tree._root);
 }
 
 LiveTree.prototype.start = function() {
 	var tree = this;	
 	if (tree.initialData != null) {
-		var handled = tree._handleReceivedItem(tree.initialData, {});
-		if (handled) {
-			tree._onInitialItemReceived(tree.initialData);
-		}
-		tree._updateDisplay();
+		tree._handleInitialItem(tree.initialData);
+		tree._onInitialItemReceived(tree.initialData);
 	} else {
-		tree._requestItem(tree.rootItemId, tree.expandRootItem || tree.hideRootItem ? 2 : 1, tree._onInitialItemReceived.bind(tree));
+		tree._requestItem(tree.rootItemId, (tree.expandRootItem || tree.hideRootItem) ? 2 : 1, tree._onInitialItemReceived.bind(tree), { initialRequest: true });
 	}
 }
 
