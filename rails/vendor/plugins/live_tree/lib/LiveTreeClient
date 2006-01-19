@@ -1,7 +1,7 @@
 = LiveTree Client JavaScript
 
 Author:: Emanuel Borsboom (http://www.epiphyte.ca/)
-Copyright:: Copyright (c) 2005 Emanuel Borsboom
+Copyright:: Copyright (c) 2005-2006 Emanuel Borsboom
 License:: MIT (see LICENSE[link:files/LICENSE.html])
 
 This documents the LiveTree client JavaScript object.
