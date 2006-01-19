@@ -3,7 +3,9 @@
 This list is not necessarily exhaustive.
 
 * Windows Explorer-like expand/collapse icons
-* Test on IE 5.5, Safari, others.
+* Submit Prototype bug, line 271. ???
+* Handle missing items (especially after search).
+* Test on IE 5.5, others.
 * Improve error handling.
 * Special effects:
   * Smooth scrolling when the tree changes its scrollbar position to bring items into view.
