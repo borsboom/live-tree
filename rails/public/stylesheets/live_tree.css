@@ -4,18 +4,7 @@
 	overflow: auto;
 	width: 100%;
 	height: 100%;
-}
-
-.live_tree_branch, .live_tree_root {
-	list-style-type: none;
-	margin-left: 0;
-	padding-left: 1em;	
-}
-
-.live_tree_root {
-	padding: 0;
-	margin: 0;
-	white-space: nowrap;
+	position: relative;
 }
 
 .live_tree_loading_tree {
@@ -27,18 +16,70 @@
 }
 
 .live_tree_item {
+	white-space: nowrap;
 }
 
-a.live_tree_branch_expand_link {
+.live_tree_item_indent {
+	margin-left: 1em;
 }
 
-a.live_tree_branch_collapse_link {
+.live_tree_item_heading {
+}
+
+a.live_tree_branch_expand_collapse_link {
 }
 
 .live_tree_item_icon {
 	color: #048;
 	border-style: none;
 	margin-right: 0.5ex;
+	width: 12px;
+	height: 12px;
+}
+
+/* XXX get rid of animation */
+
+.live_tree_branch_expanded_icon {
+	background: url(/images/live_tree_branch_anim.gif);	
+	background-position: 0px -72px;
+}
+
+.live_tree_branch_icon_frame_0 {
+	background: url(/images/live_tree_branch_anim.gif);	
+	background-position: 0px 0px;
+}
+
+.live_tree_branch_icon_frame_1 {
+	background: url(/images/live_tree_branch_anim.gif);	
+	background-position: 0px -12px;
+}
+
+.live_tree_branch_icon_frame_2 {
+	background: url(/images/live_tree_branch_anim.gif);	
+	background-position: 0px -24px;
+}
+
+.live_tree_branch_icon_frame_3 {
+	background: url(/images/live_tree_branch_anim.gif);	
+	background-position: 0px -36px;
+}
+
+.live_tree_branch_icon_frame_4 {
+	background: url(/images/live_tree_branch_anim.gif);	
+	background-position: 0px -48px;
+}
+
+.live_tree_branch_icon_frame_5 {
+	background: url(/images/live_tree_branch_anim.gif);	
+	background-position: 0px -60px;
+}
+
+.live_tree_branch_icon_frame_6 {
+	background: url(/images/live_tree_branch_anim.gif);	
+	background-position: 0px -72px;
+}
+
+.live_tree_leaf_icon {
 }
 
 .live_tree_check_box {
@@ -46,6 +87,8 @@ a.live_tree_branch_collapse_link {
 
 .live_tree_loading_icon {
 	margin-right: 0.5ex;
+	width: 10px;
+	height: 10px;
 }
 
 a.live_tree_item_link {
