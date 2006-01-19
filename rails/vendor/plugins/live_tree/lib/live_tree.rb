@@ -53,6 +53,7 @@ module LiveTree
 				"	LIVE_TREE_OPTIONS_" + name.to_s.upcase + "\n" +
 				"end\n" +
 				"def #{name}_live_tree_data\n" +
+				#"	raise 'XXX'\n" +
 				"	get_live_tree_data(" + model + ".find(live_tree_item_id), #{name}_live_tree_options)\n" +
 				"end\n"
 			#STDERR.write("\n\n#{code}\n\n")
@@ -220,7 +221,7 @@ module LiveTree
 			"new LiveTree(\"" + tree_id.to_s + "\"," + options_js + ")"
 		end
 		
-		# Returns data in format appropriate for use with the <tt>:initial_data</tt> parameter of #construct_live_tree_function .
+		# Returns data in JSON[http://www.crockford.com/JSON/index.html] notation appropriate for use with the <tt>:initial_data</tt> parameter of #construct_live_tree_function .
 		#
 		# Arguments:
 		# * +item+ - Root item of the data.
@@ -232,7 +233,7 @@ module LiveTree
 		
 	end
 	
-	# Renders data to return to a LiveTree data request.
+	# Renders data in JSON[http://www.crockford.com/JSON/index.html] notation to return to a LiveTree data request.
 	#
 	# Arguments:
 	# * +item+ - Item to return.
@@ -240,7 +241,9 @@ module LiveTree
 	#   * <tt>:get_item_name_proc</tt> - Proc object which, when called with an item, returns the name of the item to display. (by default, the item's name is retrieved using the object's +name+ attribute).
 	#   * <tt>:get_item_children_proc</tt> - Proc object which, when called with an item, returns the item's children. (by default, the item's children are retrieved using the object's +children+ attribute).
 	#   * <tt>:get_item_parent_proc</tt> - Proc object which, when called with an item, returns the item's parent. (by default, the item's parent is retrieved using the object's +parent+ attribute).
-	def get_live_tree_data(item, options = {})	
+    def get_live_tree_data(item, options = {})	
+		#data = LiveTreeHelper.get_live_tree_data(item, options, params)
+		#render :text => data
 		render :inline => '<%= _get_live_tree_data(item, options, params) %>', :locals => { :item => item, :options => options }
 	end
 
