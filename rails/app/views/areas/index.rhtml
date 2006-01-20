@@ -1,7 +1,6 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html><head>
 	<title>LiveTree Demo</title>
-	<%= stylesheet_link_tag('style') %>
 	<%= stylesheet_link_tag('live_tree') %>	
 	<%= javascript_include_tag "prototype", "effects" %>
 	<%= javascript_include_tag "live_tree" %>
@@ -47,6 +46,7 @@
 			#:root_item_id => @root_area.id,
 			#:initial_data => "{id:100,name:'foo'}",
 			:initial_data_root => @root_area,
+            #:initial_data_options => { :depth => 1 },
 			#:initial_data_whole_tree => true,
 			
 			#:css_class => "area_tree",

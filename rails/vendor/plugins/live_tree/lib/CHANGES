@@ -1,5 +1,10 @@
+Client:
+- Better error handling.
+- Rework of display system.
+
 0.1.1 - January 16, 2006
 
+Rails Server:
 - Packaged code as a plugin.
 - Added +get_item_children_proc+ option.
 - Added +get_item_parent_proc+ option.

@@ -40,7 +40,6 @@ function LiveTree(id, options) {
 	this.initialData = options.initialData;
 	this.scroll = (options.scroll == null ? true : options.scroll);
 	this.preloadItems = (options.preloadItems == null ? true : options.preloadItems);
-	this.specialEffects = (options.specialEffects == null ? true : options.specialEffects);
 	
 	this.collapsedItemIconHtml = options.collapsedItemIconHtml;
 	this.expandedItemIconHtml = options.expandedItemIconHtml;
@@ -66,7 +65,8 @@ function LiveTree(id, options) {
 	this._updateItemDisplay = null;
 }
 
-LiveTree.DEV_SHOW_PRELOADS = true;
+//LiveTree.DEV_SHOW_PRELOADS = true;
+//LiveTree.DEV_SHOW_ITEM_IDS = true;
 
 LiveTree.prototype._markItemForUpdateDisplay = function (item) {
 	var tree = this;
@@ -94,7 +94,7 @@ LiveTree.prototype._getCollapsedItemIconHtml = function (item) {
 		return this.collapsedItemIconHtml;
 	} else {
 		//return '<img src="/images/live_tree_branch_collapsed_icon.gif" alt="&gt;" width="9" height="9" class="' + this._getClass("item_icon") + '" />';
-		return '<img src="/images/live_tree_transparent_pixel.gif" alt="&gt;" id="' + this.id + '_item_icon_' + item.id + '" class="' + this._getClass("item_icon") + ' ' + this._getClass("branch_icon_frame_0") + '" />';
+		return '<img src="/images/live_tree_transparent_pixel.gif" alt="&gt;" id="' + this.id + '_item_icon_' + item.id + '" class="' + this._getClass("item_icon") + ' ' + this._getClass("branch_collapsed_icon") + '" />';
 	}
 }
 
@@ -103,7 +103,7 @@ LiveTree.prototype._getExpandedItemIconHtml = function (item) {
 		return this.expandedItemIconHtml;
 	} else {
 		//return '<img src="/images/live_tree_branch_expanded_icon.gif" alt="v" width="9" height="9" class="' + this._getClass("item_icon") + '" />';
-		return '<img src="/images/live_tree_transparent_pixel.gif" alt="v" id="' + this.id + '_item_icon_' + item.id + '" class="' + this._getClass("item_icon") + ' ' + this._getClass("branch_icon_frame_" + (LiveTree.BRANCH_ICON_FRAMES - 1)) + '" />';
+		return '<img src="/images/live_tree_transparent_pixel.gif" alt="v" id="' + this.id + '_item_icon_' + item.id + '" class="' + this._getClass("item_icon") + ' ' + this._getClass("branch_expanded_icon") + '" />';
 	}
 }
 
@@ -148,7 +148,7 @@ LiveTree.prototype._startPreloads = function (item) {
 	if (item == null) {
 		item = tree._root;
 	}
-	//alert("startPreloads " + item.id);
+	//alert("XXX startPreloads " + item.id);
 	if (!item.isExpanded || item.isLoading) {
 		return false;
 	}
@@ -177,7 +177,11 @@ LiveTree.prototype._startPreloads = function (item) {
 	if (doLoad) {
 		//alert("XXX preloading children of " + item.id);
 		tree._preloadCount++;
-		tree._requestItem(item.id, 3, tree._onPreloadItemReceived.bind(tree));	
+        if (item == tree._root) {
+		    tree._requestItem(tree._root.children[0].id, 2, tree._onPreloadItemReceived.bind(tree));	
+        } else {
+		    tree._requestItem(item.id, 3, tree._onPreloadItemReceived.bind(tree));	
+        }
 		if (LiveTree.DEV_SHOW_PRELOADS) {
 			tree._markItemForUpdateDisplay(item);
 		}
@@ -218,6 +222,7 @@ LiveTree.prototype._stopLoading = function () {
 
 LiveTree.prototype._onItemFailure = function (request) {
 	alert("LiveTree error: could not get data from server: HTTP error: " + request.status);
+    alert(request.responseText); //XXX
 	this._stopLoading();
 }
 
@@ -266,6 +271,7 @@ LiveTree.prototype._onPreloadItemReceived = function (item, requestOptions) {
 	}
 	//alert("XXX got preload item");
 	tree._preloadCount--;
+    item.isLoading = false;
 	for (var i = 0; i < item.children.length; i++) {
 		item.children[i].isLoading = false;		
 	}
@@ -342,43 +348,15 @@ LiveTree.prototype._getChildrenListElem = function (item) {
 	}
 }
 
-LiveTree.BRANCH_ICON_FRAMES = 7;
-
-LiveTree.prototype._branchIconAnim = function (item, frame, direction, prevClass) {
-	var tree = this;
-	if (frame < LiveTree.BRANCH_ICON_FRAMES && frame >= 0) {
-		var elem = $(tree.id + "_item_icon_" + item.id);
-		if (prevClass) {
-			Element.removeClassName(elem, prevClass);
-		}
-		var className = tree._getClass("branch_icon_frame_" + frame);
-		Element.addClassName(elem, className);
-		var f = function () {
-			tree._branchIconAnim(item, frame + direction, direction, className);
-		}
-		window.setTimeout(f, 100);	
-	} else {
-		
-	}
-}
-
 LiveTree.prototype._renderItemHeading = function (item) {
 	var tree = this;
 	var html = '';
 	if (!item.isLeaf) {
 		html += '<a href="#" id="' + tree.id + '_branch_expand_collapse_link_' + item.id + '" class="' + this._getClass("branch_expand_collapse_link") + '">';
 		if (item.isExpanded) {
-			if (tree.specialEffects && !item.expandedVisible) {
-				html += tree._getCollapsedItemIconHtml(item);
-			} else {
-				html += tree._getExpandedItemIconHtml(item);
-			}
+            html += tree._getExpandedItemIconHtml(item);
 		} else {
-			if (tree.specialEffects && item.expandedVisible) {
-				html += tree._getExpandedItemIconHtml(item);
-			} else {
-				html += tree._getCollapsedItemIconHtml(item);
-			}
+            html += tree._getCollapsedItemIconHtml(item);
 		}
 		html += '</a>';
 		if (item.isLoading && !item.isLoadingBackground) {
@@ -398,7 +376,9 @@ LiveTree.prototype._renderItemHeading = function (item) {
 		name_html = '<a href="#" id="' + tree.id + '_item_link_' + item.id + '" class="' + this._getClass("item_link") + '">' + name_html + '</a>';
 		itemLinkExists = true;
 	}
-	name_html = "(" + item.id + ") " + name_html; //XXX
+    if (LiveTree.DEV_SHOW_ITEM_IDS) {
+	    name_html = "(" + item.id + ") " + name_html;
+    }
 	html += name_html;
 	if (LiveTree.DEV_SHOW_PRELOADS) {
 		if (item.isLoading && item.isLoadingBackground) {
@@ -409,16 +389,9 @@ LiveTree.prototype._renderItemHeading = function (item) {
 	if (!item.isLeaf) {
 		if (item.isExpanded) {
 			$(tree.id + '_branch_expand_collapse_link_' + item.id).onclick = function () { tree._onClickCollapse(item); return false }		
-			if (!item.expandedVisible && tree.specialEffects) {
-				tree._branchIconAnim(item, 0, 1);
-			}			
 		} else {
 			$(tree.id + '_branch_expand_collapse_link_' + item.id).onclick = function () { tree._onClickExpand(item); return false }
-			if (item.expandedVisible && tree.specialEffects) {
-				tree._branchIconAnim(item, LiveTree.BRANCH_ICON_FRAMES - 1, -1);
-			}
 		}
-		item.expandedVisible = item.isExpanded;
 	}
 	if (itemLinkExists) {
 		$(tree.id + '_item_link_' + item.id).onclick = function() { tree._onClickItem(item); return false }
@@ -438,25 +411,6 @@ LiveTree.prototype._hideItemChildren = function (item) {
 		}
 	}
 	item.childrenVisible = false;
-}
-
-LiveTree.prototype._afterFinishSlideDown = function (effect) {
-	var tree = this;
-	var slideElem = $(tree.id + "_slide");
-	slideElem.innerHTML = "";
-	tree._updateItemChildren(effect.options._liveTreeItem, slideElem, effect.options._liveTreeIndentLevel, $(tree.id));
-	$(tree.id).removeChild(slideElem);		
-	tree.slideInProgress = false;
-	tree._markItemForUpdateDisplay(effect.options._liveTreeItem);
-	tree._updateDisplay();
-}
-
-LiveTree.prototype._afterFinishSlideUp = function (effect) {
-	var tree = this;
-	$(tree.id).removeChild($(tree.id + "_slide"));
-	tree.slideInProgress = false;
-	tree._markItemForUpdateDisplay(effect.options._liveTreeItem);
-	tree._updateDisplay();
 }
 
 LiveTree.prototype._updateItemChildren = function (item, afterElem, indentLevel, containerElem) {
@@ -488,32 +442,10 @@ LiveTree.prototype._updateItemChildren = function (item, afterElem, indentLevel,
 		}		
 	}
 	
-	function doSlide(slideClass, afterFinish) {
-		var html = "";
-		html += '<div id="' + tree.id + '_slide" style="position:relative"><div>';
-		html += '<div id="' + tree.id + '_slide_root"></div>';
-		html += '</div></div>';
-		new Insertion.After(afterElem, html);
-		containerElem = $(tree.id + "_slide").firstChild;
-		afterElem = $(tree.id + "_slide_root");
-		tree.slideInProgress = true;
-		doUpdate();
-		new slideClass(tree.id + "_slide", { afterFinish: afterFinish, _liveTreeItem: item, _liveTreeIndentLevel: indentLevel });
-	}
-	
 	if (!item.isExpanded) {
-		if (item.childrenVisible && tree.specialEffects && !tree.slideInProgress) {
-			tree._hideItemChildren(item);
-			doSlide(Effect.SlideUp, tree._afterFinishSlideUp.bind(tree));
-		} else {
-			tree._hideItemChildren(item);
-		}
+        tree._hideItemChildren(item);
 	} else {		
-		if (!item.childrenVisible && tree.specialEffects && !tree.slideInProgress) {
-			doSlide(Effect.SlideDown, tree._afterFinishSlideDown.bind(tree));
-		} else {
-			doUpdate();
-		}		
+        doUpdate();
 		item.childrenVisible = true;
 	}
 	return afterElem;
