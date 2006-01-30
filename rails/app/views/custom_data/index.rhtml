@@ -1,0 +1,24 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head>
+    <title>LiveTree Custom Data Action Demo</title>
+    <%= stylesheet_link_tag('live_tree') %>	
+    <%= javascript_include_tag "prototype" %>
+    <%= javascript_include_tag "live_tree" %>
+</head><body>
+
+<h2>LiveTree Custom Data Action Demo</h2>
+
+<p><div style="width:300px;height:415px">
+
+    <!-- This uses construct_live_tree_function() to construct the JavaScript that creates the tree.
+         It passes :root_item_id to the LiveTree client, which means the client has to connect to 
+         the server to get its initial data.  To preload it with its initial data, pass it
+         the root object using the :initial_data_root argument instead, or an :initial_data argument
+         constructed using construct_live_tree_data(). -->
+    
+    <%= javascript_tag(construct_live_tree_function("my_tree", :data_action => 'my_live_tree_data', :root_item_id => 'Root') + ".render()") %>
+</div></p>
+
+<p><a href="/">See other demos</a>.</p>
+
+</body></html>

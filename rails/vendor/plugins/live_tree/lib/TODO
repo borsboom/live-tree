@@ -2,21 +2,17 @@
 
 This list is not necessarily exhaustive.
 
-* Windows Explorer-like expand/collapse icons
-* Submit Prototype bug, line 271. ???
 * Handle missing items (especially after search).
 * Test on IE 5.5, others.
-* Improve error handling.
 * Special effects:
   * Smooth scrolling when the tree changes its scrollbar position to bring items into view.
   * Slide-down effect when a branch is opened.
   * Rotate between branch expanded/collapsed closed icons when expanding/collapsing.
-* Specify query condition for LiveTree::ClassMethods.live_tree .
 * Give some consideration to fall-backs if the browser does not support JavaScript or AJAX.
 * Implement checkboxes next to tree items as an option.
-* Truncate item names intelligently.
-* Show tooltips that show full name of truncated items.
+* Truncate item names intelligently, and display tooltip when hovering that shows whole name
 * Ability to handle changing trees: manipulate tree on the client side, and update portions of the tree from the server.
 * Persistance: allow user to leave the page, and come back, and have the same folders open
-* Support non-numeric IDs
-* Document writing custom data server method
+* Ability to force re-downloading of folder contents every time the folder is opened
+* Ability to "refresh" whole tree, while returning to same folder
+* Ability to refresh a folder

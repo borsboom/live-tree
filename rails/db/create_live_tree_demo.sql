@@ -1,3 +1,44 @@
+DROP TABLE IF EXISTS `nested_set_items`;
+CREATE TABLE `nested_set_items` (
+  `id` int(11) NOT NULL auto_increment,
+  `parent_id` int(11) default NULL,
+  `lft` int(11) NOT NULL default '0',
+  `rgt` int(11) NOT NULL default '0',
+  `name` varchar(100) NOT NULL default '',
+  PRIMARY KEY  (`id`)
+);
+
+LOCK TABLES `nested_set_items` WRITE;
+INSERT INTO `nested_set_items` VALUES (1,NULL,1,14,'Root');
+INSERT INTO `nested_set_items` VALUES (2,1,2,7,'Child 1');
+INSERT INTO `nested_set_items` VALUES (3,2,3,4,'Child 1.1');
+INSERT INTO `nested_set_items` VALUES (4,2,5,6,'Child 1.2');
+INSERT INTO `nested_set_items` VALUES (5,1,8,13,'Child 2');
+INSERT INTO `nested_set_items` VALUES (6,5,9,10,'Child 2.1');
+INSERT INTO `nested_set_items` VALUES (7,5,11,12,'Child 2.2');
+UNLOCK TABLES;
+
+DROP TABLE IF EXISTS `other_column_names_items`;
+CREATE TABLE `other_column_names_items` (
+  `widget_name` char(16) NOT NULL,
+  `parent_widget` char(16) default NULL,
+  `widget_description` varchar(100) NOT NULL default '',
+  `children_count` int(11) NOT NULL default '0',
+  PRIMARY KEY  (`widget_name`)
+);
+
+LOCK TABLES `other_column_names_items` WRITE;
+INSERT INTO `other_column_names_items` VALUES ('R"&foo=bar',NULL,'Root',2);
+INSERT INTO `other_column_names_items` VALUES ('C''1"&foo=bar','R"&foo=bar','Child 1',2);
+INSERT INTO `other_column_names_items` VALUES ('C''1"1&foo=bar','C''1"&foo=bar','Child 1.1',0);
+INSERT INTO `other_column_names_items` VALUES ('C''1"2&foo=bar','C''1"&foo=bar','Child 1.2',0);
+INSERT INTO `other_column_names_items` VALUES ('C''2"&foo=bar','R"&foo=bar','Child 2',2);
+INSERT INTO `other_column_names_items` VALUES ('C''2"1&foo=bar','C''2"&foo=bar','Child 2.1',0);
+INSERT INTO `other_column_names_items` VALUES ('C''2"2&foo=bar','C''2"&foo=bar','Child 2.2',0);
+UNLOCK TABLES;
+
+--quit; --XXX
+
 DROP TABLE IF EXISTS `areas`;
 CREATE TABLE `areas` (
   `id` int(11) NOT NULL auto_increment,
@@ -501,7 +542,7 @@ INSERT INTO `areas` (`id`, `parent_id`, `name`, `map_id`, `children_count`) VALU
 INSERT INTO `areas` (`id`, `parent_id`, `name`, `map_id`, `children_count`) VALUES (537,503,'GB Gibsons',NULL,0);
 INSERT INTO `areas` (`id`, `parent_id`, `name`, `map_id`, `children_count`) VALUES (538,503,'HB Halfmoon Bay',NULL,0);
 INSERT INTO `areas` (`id`, `parent_id`, `name`, `map_id`, `children_count`) VALUES (539,503,'PE Pender',NULL,0);
-INSERT INTO `areas` (`id`, `parent_id`, `name`, `map_id`, `children_count`) VALUES (540,503,'RC Robert\'s Creek',NULL,0);
+INSERT INTO `areas` (`id`, `parent_id`, `name`, `map_id`, `children_count`) VALUES (540,503,'RC Robert''s Creek',NULL,0);
 INSERT INTO `areas` (`id`, `parent_id`, `name`, `map_id`, `children_count`) VALUES (541,503,'SD Sechelt',NULL,0);
 INSERT INTO `areas` (`id`, `parent_id`, `name`, `map_id`, `children_count`) VALUES (542,503,'ZZ Other',NULL,0);
 INSERT INTO `areas` (`id`, `parent_id`, `name`, `map_id`, `children_count`) VALUES (543,505,'Chilliwack',NULL,0);

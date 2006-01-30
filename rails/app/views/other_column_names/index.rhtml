@@ -1,0 +1,19 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head>
+    <title>LiveTree Other Column Names Demo</title>
+    <%= stylesheet_link_tag('live_tree') %>	
+    <%= javascript_include_tag "prototype" %>
+    <%= javascript_include_tag "live_tree" %>
+</head><body>
+
+<h2>LiveTree Other Column Names Demo</h2>
+
+<p><div style="width:300px;height:415px">
+    <%= live_tree :tree,
+                  :initial_data_root => @root,
+                  :on_click_item => "alert('Clicked: ' + item.name + ' (id=' + item.id + ')')" %>
+</div></p>
+
+<p><a href="/">See other demos</a>.</p>
+
+</body></html>

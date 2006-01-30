@@ -1,5 +1,5 @@
-LiveTree Demo
-=============
+LiveTree Demos
+==============
 
 To set up and test:
 
@@ -12,11 +12,11 @@ To set up and test:
    
 3. Uncompress the live_tree distribution inside the new rails application:
 
-   $ tar xzf /path/to/live_tree-0.1.1.tar.gz
+   $ tar xzf /path/to/live_tree-VERSION.tar.gz
     
 4. Uncompress the live_tree_demo distribution inside the new rails application:
 
-   $ tar xzf /path/to/live_tree_demo-0.1.1.tar.gz
+   $ tar xzf /path/to/live_tree_demo-VERSION.tar.gz
 
 5. Create the databases:
 
@@ -29,12 +29,10 @@ To set up and test:
    mysql> grant all on live_tree_demo_test.* to 'live_tree_demo'@'localhost' identified by 'live_tree_demo';
    mysql> grant all on live_tree_demo_production.* to 'live_tree_demo'@'localhost' identified by 'live_tree_demo';
    mysql> quit
-    
-6. Create the schema by running db/create_areas.sql:
 
-   $ mysql -u live_tree_demo --password=live_tree_demo live_tree_demo_development
-   mysql> source db/create_areas.sql
-   mysql> quit
+6. Create the schema by running db/create_live_tree_demo.sql:
+
+   $ mysql -u live_tree_demo --password=live_tree_demo live_tree_demo_development <db/create_live_tree_demo.sql
     
 7. Check config/database.yml and make sure the settings are correct.
 
@@ -44,4 +42,4 @@ To set up and test:
     
 9. Navigate to:
 
-   http://localhost:3000/areas
+   http://localhost:3000/
