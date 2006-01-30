@@ -12,8 +12,7 @@ Client:
 Rails Server:
 
 * Support non-numeric IDs.
-* Support getting IDs from a data structure with a name other than +id+
-  (only useful for a custom data action).
+* Ability to easily serve data from non-ActiveRecord models.
     
 Demos:
 
