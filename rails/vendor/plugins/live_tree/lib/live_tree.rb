@@ -1,4 +1,4 @@
-# Version:: 0.1.1
+# Version:: 0.1.2
 # Author:: Emanuel Borsboom (http://www.epiphyte.ca/)
 # Copyright:: Copyright (c) 2005-2006 Emanuel Borsboom
 # License:: MIT (see LICENSE[link:files/LICENSE.html])
