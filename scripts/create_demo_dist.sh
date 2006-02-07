@@ -7,9 +7,10 @@ nested_set_files="app/models/nested_set_item.rb app/views/nested_set/index.rhtml
 other_column_names_files="app/views/other_column_names/index.rhtml app/controllers/other_column_names_controller.rb app/helpers/other_column_names_helper.rb app/models/other_column_names_item.rb"
 custom_data_files="app/views/custom_data/index.rhtml app/controllers/custom_data_controller.rb app/helpers/custom_data_helper.rb"
 non_model_data_files="app/views/non_model_data/index.rhtml app/controllers/non_model_data_controller.rb app/helpers/non_model_data_helper.rb"
+file_system_files="app/views/file_system/index.rhtml app/controllers/file_system_controller.rb app/helpers/file_system_helper.rb"
 readme_files="README.live_tree_demo"
 
-files="$base_files $areas_files $nested_set_files $other_column_names_files $custom_data_files $non_model_data_files $readme_files"
+files="$base_files $areas_files $nested_set_files $other_column_names_files $custom_data_files $non_model_data_files $file_system_files $readme_files"
 cd "/d/LiveTree/src/rails"
 rm ../../dists/live_tree_demo-$ver.tar.gz
 tar czvf ../../dists/live_tree_demo-$ver.tar.gz --exclude=".svn" $files

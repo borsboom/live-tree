@@ -97,7 +97,7 @@ The LiveTree::ClassMethods.live_tree class method sets up your controller to ser
 By default, it gets a data item's name using the model object's +name+ property.
 You can change that using the <tt>:get_item_name_proc</tt> option.
 Also note that the LiveTree does not escape HTML special characters in item names, so your names can
-contain HTML formatting and special characters (and if this is not desirable, you must use the <tt>:get_item_name_proc</tt> option to escape the name).
+contain HTML formatting and special characters (and if this is not desirable, you must use the <tt>:get_item_name_proc</tt> option to escape the name using CGI::escapeHTML).
 
 The <tt>show_tree</tt> action defined in the example reads the specified person from the database, which will be the root (top) of the displayed family tree, for use by the view.
 

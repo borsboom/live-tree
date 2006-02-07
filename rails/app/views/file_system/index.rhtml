@@ -1,0 +1,23 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head>
+    <title>LiveTree File System Demo</title>
+    <%= stylesheet_link_tag('live_tree') %>	
+    <%= javascript_include_tag "prototype" %>
+    <%= javascript_include_tag "live_tree" %>
+</head><body>
+
+<h2>LiveTree File System Demo</h2>
+
+<p><div style="width:300px;height:415px">
+    <%= live_tree :fstree, 
+                  :initial_data_root => @fsroot,
+                  :on_click_item => "this.activateItem(item.id)" %>
+</div></p>
+
+<p>
+    <%= link_to_function "Jump to live_tree.rb", "fstree.expandParentsOfItem('/vendor/plugins/live_tree/lib/live_tree.rb'); fstree.activateItem('/vendor/plugins/live_tree/lib/live_tree.rb')" %>
+    &nbsp;&nbsp;&nbsp;
+    <a href="/">See other demos</a>
+</p>
+
+</body></html>
