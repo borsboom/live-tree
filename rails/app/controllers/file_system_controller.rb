@@ -4,6 +4,9 @@ class FileSystemController < ApplicationController
         def initialize(path, root)
             @path = path
             @root = File.expand_path(root)
+            if File.expand_path(File.join(@root, @path))[0,@root.length] != @root
+                raise ArgumentError, "Invalid path", caller
+            end
         end
         def name
             CGI::escapeHTML(File.basename(File.expand_path(File.join(@root, @path))))
@@ -12,7 +15,7 @@ class FileSystemController < ApplicationController
             @path
         end
         def parent
-            if File.expand_path(File.join(@root, @path)) == @root
+            if File.expand_path(File.dirname(File.join(@root, @path)))[0,@root.length] != @root
                 nil
             else
                 FSItem.new(File.dirname(@path), @root)
