@@ -40,6 +40,7 @@ function LiveTree(id, options) {
     this.initialData = options.initialData;
     this.scroll = (options.scroll == null ? true : options.scroll);
     this.preloadItems = (options.preloadItems == null ? true : options.preloadItems);
+    this.contextMenu = (options.contextMenu == null ? true : options.contextMenu);
     
     this.collapsedItemIconHtml = options.collapsedItemIconHtml;
     this.expandedItemIconHtml = options.expandedItemIconHtml;
@@ -52,12 +53,12 @@ function LiveTree(id, options) {
     this.notLoadedItemHtml = options.notLoadedItemHtml;
 
     this.onClickItem = options.onClickItem;
+	this.onContextMenu = options.onContextMenu;    
     this.allowClickBranch = (options.allowClickBranch == null ? true : options.allowClickBranch);
     this.allowClickLeaf = (options.allowClickLeaf == null ? true : options.allowClickLeaf);
     this.onExpandItem = options.onExpandItem;
     this.onCollapseItem = options.onCollapseItem;
     this.onLoadItem = options.onLoadItem;
-	this.onContextMenu = options.onContextMenu;    
     
     this._root = {};
     this._itemsIndex = {};
@@ -459,6 +460,33 @@ LiveTree.prototype._isRootItem = function (item) {
     return item == tree._root || (tree.hideRootItem && item == tree._root.children[0]);
 }
 
+LiveTree.prototype._onContextMenu = function (item, event) {
+    var tree = this;
+    if (tree.onContextMenu != null) {
+        if (!tree.onContextMenu(item, event)) {
+            return false;
+        }
+    }
+    if (tree.contextMenu) {        
+        var contextMenuElem = $(tree.id + "_context_menu")
+        if (contextMenuElem == null) {
+            contextMenuElem = document.createElement("DIV");
+            contextMenuElem.id = tree.id + "_context_menu";
+            Element.addClassName(contextMenuElem, tree._getClass("context_menu"));
+            contextMenuElem.innerHTML = '<ul><li><a id="' + tree.id + '_context_menu_refresh' + '"href="#">Refresh</a></li></ul>';
+            contextMenuElem.onmouseout = function () { Element.hide(this); return true; };
+            contextMenuElem.onmouseover = function () { Element.show(this); return true; };
+            document.getElementsByTagName("body").item(0).appendChild(contextMenuElem);
+        }
+        $(tree.id + "_context_menu_refresh").onclick = function (event) { tree.reloadChildrenOfItem(item.id); Element.hide(contextMenuElem); return false; };
+        contextMenuElem.style.left = (Event.pointerX(event) - 5) + "px";
+        contextMenuElem.style.top = (Event.pointerY(event) - 5) + "px";
+        Element.show(contextMenuElem);        
+        return false;
+    }
+    return true;
+}
+
 LiveTree.prototype._renderItemHeading = function (item) {
     var tree = this;
     var html = '';
@@ -501,16 +529,16 @@ LiveTree.prototype._renderItemHeading = function (item) {
     $(tree.id + "_item_heading_" + tree._escapeId(item.id)).innerHTML = html;
     if (!tree._isLeaf(item)) {
         if (tree._isExpanded(item)) {
-            $(tree.id + '_item_branching_link_' + tree._escapeId(item.id)).onclick = function (event) { tree._onClickCollapse(item, event); return false }		
+            $(tree.id + '_item_branching_link_' + tree._escapeId(item.id)).onclick = function (event) { tree._onClickCollapse(item, event||window.event); return false; }
         } else {
-            $(tree.id + '_item_branching_link_' + tree._escapeId(item.id)).onclick = function (event) { tree._onClickExpand(item, event); return false }
+            $(tree.id + '_item_branching_link_' + tree._escapeId(item.id)).onclick = function (event) { tree._onClickExpand(item, event||window.event); return false; }
         }
     }
     if (itemLinkExists) {
-        $(tree.id + '_item_link_' + tree._escapeId(item.id)).onclick = function(event) { tree._onClickItem(item, event); return false }
+        $(tree.id + '_item_link_' + tree._escapeId(item.id)).onclick = function (event) { tree._onClickItem(item, event||window.event); return false; }
     }    
-    if (tree.onContextMenu != null) {
-        $(tree.id + '_item_name_' + tree._escapeId(item.id)).oncontextmenu = function(event) { return tree.onContextMenu(item, event) }
+    if (tree.contextMenu || tree.onContextMenu != null) {
+        $(tree.id + '_item_name_' + tree._escapeId(item.id)).oncontextmenu = function (event) { return tree._onContextMenu(item, event||window.event) }
     }
 }
 

@@ -6,6 +6,7 @@ Client:
 * *BREAKING* *CHANGE*: CSS: Changed +live_tree_item_icon+ class name to +live_tree_item_branching_icon+.
 * *BREAKING* *CHANGE*: CSS: Changed +live_tree_branch_expand_collapse_link+ class name to +live_tree_branching_link+.
 * Support for reloading the children of a branch using <tt>reloadChildrenOfItem()</tt> method.
+* If you right-click an item, a context menu appears that will refresh that item's children.
 * Support for items with icons through +icon+ property of item.
 * Support for persistent state using <tt>getState()</tt> method and +initialState+ option.
 * Support for capturing right-clicks on an item using the +onContextMenu+ event.

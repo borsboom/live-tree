@@ -11,7 +11,7 @@ file_system_files="app/models/file_system_item.rb app/views/file_system/index.rh
 persistance_files="app/views/persistance/index.rhtml app/controllers/persistance_controller.rb app/helpers/persistance_helper.rb"
 readme_files="README.live_tree_demo"
 
-files="$base_files $areas_files $nested_set_files $other_column_names_files $custom_data_files $non_model_data_files $file_system_files $readme_files"
+files="$base_files $areas_files $nested_set_files $other_column_names_files $custom_data_files $non_model_data_files $file_system_files $persistance_files $readme_files"
 cd "/d/LiveTree/src/rails"
 rm ../../dists/live_tree_demo-$ver.tar.gz
 tar czvf ../../dists/live_tree_demo-$ver.tar.gz --exclude=".svn" $files

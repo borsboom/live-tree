@@ -56,6 +56,7 @@
                       #:hide_root_item => true,
                       #:scroll => false,
                       #:preload_items => false,
+                      #:context_menu => false,
                     
                       :on_click_item => "areaTreeOnClickItem(this, item.id, item.isLeaf, item.isLeaf ? item.parent.id : item.id)",
                       #:on_context_menu => "alert('context ' + item.id + ' event=' + event);return false",

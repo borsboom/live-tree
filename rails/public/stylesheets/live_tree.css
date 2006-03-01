@@ -88,3 +88,30 @@ a.live_tree_item_link {
     color: white;
 }
 
+.live_tree_context_menu {
+    position: absolute;
+    background-color: white;
+    border: 1px solid black;
+    padding: 5px;
+}
+
+.live_tree_context_menu ul {
+    margin: 0px;
+    padding: 0px;
+}
+
+.live_tree_context_menu li {
+    margin: 0px;
+    padding: 0px;
+    list-style-type: none;
+}
+
+.live_tree_context_menu a {
+    color: black;
+    padding: 2px;
+}
+
+.live_tree_context_menu a:hover {
+    background-color: #048; 
+    color: white;    
+}

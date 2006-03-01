@@ -26,7 +26,8 @@ LiveTree requires the following libraries:
     * +cssStyle+ - CSS style to give the tree's top element (optional).
     * +expandRootItem+ - Specifies whether to expand the tree's root item initially (default +true+).
     * +hideRootItem+ - Specifies whether the root item should not be displayed (default +false+).
-    * +preloadItems+ - Specifies whether children of an expanded item should be pre-loaded (default +true).
+    * +preloadItems+ - Specifies whether children of an expanded item should be pre-loaded (default +true+).
+    * +contextMenu+ - Specifies whether LiveTree should display its own context menu when items are right-clicked (default +true+).
     * +rootItemId+ - Specifies the item ID of the root item to display (optional, and un-necessary if +initialData+ is set).
     * +initialData+ - Object that specifies data to display in the tree.  If not specified, initial data will be read from server, causing a delay for the user.  Of the form:
     
