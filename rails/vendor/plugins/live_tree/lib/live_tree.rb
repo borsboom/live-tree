@@ -306,7 +306,6 @@ module LiveTree
     #   * <tt>:item_parent_attribute</tt> - name of model attribute that returns the item's parent.  If not specified, the item's <tt>parent</tt> attribute is used
     #   * <tt>:get_item_parent_proc</tt> - proc object which, when called with an item, returns the item's parent.  If not specified, the item's <tt>parent</tt> attribute is used
     def get_live_tree_data(item, options = {})
-        #Kernel.sleep(1); #XXX
         render :inline => '<%= _get_live_tree_data(item, options, params) %>', :locals => { :item => item, :options => options }
     end
     protected :get_live_tree_data

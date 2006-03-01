@@ -1,6 +1,6 @@
 class FileSystemController < ApplicationController
 
-    TEXT_EXTENSIONS = [".rb", ".js", ".css", ".html", ".rhtml", ".sql", ".txt", ""];
+    TEXT_EXTENSIONS = [".rb", ".js", ".css", ".html", ".rhtml", ".sql", ".txt", ".live_tree_demo", ""];
     IMAGE_EXTENSIONS = [".jpg", ".jpeg", ".gif", ".png"];
 
     live_tree :fstree,
