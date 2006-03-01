@@ -1,6 +1,6 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html><head>
-    <title>LiveTree Persist State Demo</title>
+    <title>LiveTree Persistent State Demo</title>
     <%= stylesheet_link_tag('live_tree') %>	
     <%= javascript_include_tag "prototype" %>
     <%= javascript_include_tag "live_tree" %>
@@ -25,9 +25,9 @@
 
 <body onunload="document.cookie='treeState=' + escape(tree.getState())">
 
-<h2>LiveTree Persist State Demo</h2>
+<h2>LiveTree Persistent State Demo</h2>
 
-<p>Expand some branches in the tree, and then hit your browser's reload button.
+<p>Expand some branches in the tree, and then go to a different page and come back.
 The tree will reload its data, but will have the same branches open, and 
 same item selected.</p>
 
