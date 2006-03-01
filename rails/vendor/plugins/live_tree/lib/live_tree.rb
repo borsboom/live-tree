@@ -21,13 +21,20 @@ module LiveTree
         # * <tt>options</tt> - may contain:
         #   * <tt>:model</tt> - name of the model to use for retrieving data (symbol).
         #   * <tt>:model_class_name</tt> - name of the model's class, incase it can't be inferred (string)
+        #   * <tt>:find_item_method</tt> - name of model class method which, when called with an ID, returns the item with that ID.  If not specified, the model's +find+ method is used.
         #   * <tt>:find_item_proc</tt> - proc object which, when called with an ID, returns the item with that ID.  If not specified, the model's +find+ method is used.
-        #   * <tt>:get_item_id_proc</tt> - proc object which, when called with an item, returns the id of the item to display. If not specified, the item's id is retrieved using the object's +id+ attribute.  This parameter will only be useful if you also specify <tt>:find_item_proc</tt>.
+        #   * <tt>:item_id_attribute</tt> - name of model attribute that returns the id of the item to display. If not specified, the item's id is retrieved using the object's +id+ attribute.  This option will only be useful if you also specify <tt>:find_item_method</tt> or <tt>:find_item_proc</tt>.
+        #   * <tt>:get_item_id_proc</tt> - proc object which, when called with an item, returns the id of the item to display. If not specified, the item's id is retrieved using the object's +id+ attribute.  This option will only be useful if you also specify <tt>:find_item_method</tt> or <tt>:find_item_proc</tt>.
+        #   * <tt>:item_name_attribute</tt> - name of model attribute that returns the name of the item to display.  If not specified, the item's name is retrieved using the object's +name+ attribute.
+        #   * <tt>:render_item_name</tt> - arguments to +render+ to render the name of the item.  It is passed a a local variable called +item+.  If not specified, the item's name is retrieved using the object's +name+ attribute.
+        #   * <tt>:render_item_icon</tt> - arguments to +render+ to render the item's icon.  It is passed a a local variable called +item+.  If not specified, the item does not have an icon.
         #   * <tt>:get_item_name_proc</tt> - proc object which, when called with an item, returns the name of the item to display.  If not specified, the item's name is retrieved using the object's +name+ attribute.
+        #   * <tt>:item_children_attribute</tt> - name of model attribute that returns the item's children.  If not specified, the item's +children+ attribute is used.
         #   * <tt>:get_item_children_proc</tt> - proc object which, when called with an item, returns the item's children.  If not specified, the item's +children+ attribute is used.
+        #   * <tt>:item_parent_attribute</tt> - name of model attribute that returns the item's parent.  If not specified, the item's <tt>parent</tt> attribute is used
         #   * <tt>:get_item_parent_proc</tt> - proc object which, when called with an item, returns the item's parent.  If not specified, the item's <tt>parent</tt> attribute is used
         #
-        # Either one of <tt>:model</tt>, <tt>:model_class_name</tt>, or <tt>find_item_proc</tt> must be specified.
+        # Exactly one of <tt>:model</tt>, <tt>:model_class_name</tt>, or <tt>find_item_proc</tt> must be specified.
         #
         # This example sets up this controller to serve data for a tree with name +family_tree+, that uses the +person+ model to get data:
         #
@@ -43,16 +50,23 @@ module LiveTree
             else
                 model = Inflector.camelize(options[:model])
             end
+            if options[:find_item_method]
+                find_method = options[:find_item_method]
+            else
+                find_method = :find
+            end
             self.const_set("LIVE_TREE_OPTIONS_" + name.to_s.upcase, options);
             code = "" +
                 "def _#{name}_live_tree_options\n" +
                 "    LIVE_TREE_OPTIONS_" + name.to_s.upcase + "\n" +
                 "end\n" +
+                "protected :_#{name}_live_tree_options\n" +
                 "def _#{name}_find_live_tree_item\n" +
                 (options[:find_item_proc] == nil ? 
-                    ("    " + model + ".find(live_tree_item_id)\n") :
+                    ("    " + model + "." + find_method.to_s + "(live_tree_item_id)\n") :
                     ("    _#{name}_live_tree_options[:find_item_proc].call(live_tree_item_id)\n")) +
                 "end\n" +
+                "protected :_#{name}_find_live_tree_item\n" +
                 "def #{name}_live_tree_data\n" +
                 "    get_live_tree_data(_#{name}_find_live_tree_item, _#{name}_live_tree_options)\n" +
                 "end\n"
@@ -67,8 +81,12 @@ module LiveTree
             id.kind_of?(Numeric) ? id.to_s : ("'" + escape_javascript(id.to_s) + "'");
         end
     
-        def _recurse_live_tree_data(item, depth, get_item_id_proc, get_item_name_proc, get_item_children_proc, get_item_parent_proc, special_child_id = nil, special_child_data = nil) #:nodoc:
+        def _recurse_live_tree_data(item, depth, get_item_id_proc, get_item_name_proc, get_item_icon_proc, get_item_children_proc, get_item_parent_proc, special_child_id = nil, special_child_data = nil) #:nodoc:
             result = "{id:" + _id_to_javascript(get_item_id_proc.call(item)) + ",name:'" + escape_javascript(get_item_name_proc.call(item).to_s) + "'"
+            icon = get_item_icon_proc.call(item).to_s
+            if icon.length > 0
+                result += ",icon:'" + escape_javascript(icon) + "'"
+            end
             if get_item_children_proc.call(item).size == 0
                 result += ",children:[]"
             elsif depth == nil || depth > 1
@@ -80,7 +98,7 @@ module LiveTree
                     if get_item_id_proc.call(child) == special_child_id
                         result += special_child_data
                     else
-                        result += _recurse_live_tree_data(child, depth == nil ? nil : depth - 1, get_item_id_proc, get_item_name_proc, get_item_children_proc, get_item_parent_proc, special_child_id, special_child_data)
+                        result += _recurse_live_tree_data(child, depth == nil ? nil : depth - 1, get_item_id_proc, get_item_name_proc, get_item_icon_proc, get_item_children_proc, get_item_parent_proc, special_child_id, special_child_data)
                     end
                 end
                 result += "]"
@@ -91,30 +109,59 @@ module LiveTree
 
         def _get_live_tree_data(item, options, params) #:nodoc:
             options ||= {}
-            get_item_id_proc = Proc.new { |x| x.id }
             if options[:get_item_id_proc] != nil
                 get_item_id_proc = options[:get_item_id_proc]
+            elsif options[:item_id_attribute] != nil
+                get_item_id_proc = Proc.new { |x| x.send(options[:item_id_attribute]) }
+            else
+                get_item_id_proc = Proc.new { |x| x.id }
             end
-            get_item_name_proc = Proc.new { |x| x.name }
             if options[:get_item_name_proc] != nil
                 get_item_name_proc = options[:get_item_name_proc]
+            elsif options[:item_name_attribute] != nil
+                get_item_name_proc = Proc.new { |x| x.send(options[:item_name_attribute]) }
+            elsif options[:render_item_name] != nil
+                get_item_name_proc = Proc.new { |x| 
+                    render_opts = options[:render_item_name].dup
+                    render_opts[:locals] = render_opts[:locals] ? render_opts[:locals].dup : {}
+                    render_opts[:locals][:item] = x
+                    render render_opts 
+                }
+            else
+                get_item_name_proc = Proc.new { |x| x.name }
             end
-            get_item_children_proc = Proc.new { |x| x.children }
+            if options[:render_item_icon] != nil
+                get_item_icon_proc = Proc.new { |x| 
+                    render_opts = options[:render_item_icon].dup
+                    render_opts[:locals] = render_opts[:locals] ? render_opts[:locals].dup : {}
+                    render_opts[:locals][:item] = x
+                    render render_opts 
+                }
+            else
+                get_item_icon_proc = Proc.new { |x| '' }
+            end
             if options[:get_item_children_proc] != nil
                 get_item_children_proc = options[:get_item_children_proc]
+            elsif options[:item_children_attribute] != nil
+                get_item_children_proc = Proc.new { |x| x.send(options[:item_children_attribute]) }
+            else
+                get_item_children_proc = Proc.new { |x| x.children }
             end
-            get_item_parent_proc = Proc.new { |x| x.parent }
             if options[:get_item_parent_proc] != nil
                 get_item_parent_proc = options[:get_item_parent_proc]
+            elsif options[:item_parent_attribute] != nil
+                get_item_parent_proc = Proc.new { |x| x.send(options[:item_parent_attribute]) }
+            else
+                get_item_parent_proc = Proc.new { |x| x.parent }
             end
             depth = params[:depth] == nil ? nil : params[:depth].to_i
             include_parents = params[:include_parents]
-            root_item_id = params[:root_item_id] == nil ? nil : params[:root_item_id].to_i
+            root_item_id = params[:root_item_id]
             
-            result = _recurse_live_tree_data(item, depth, get_item_id_proc, get_item_name_proc, get_item_children_proc, get_item_parent_proc)
+            result = _recurse_live_tree_data(item, depth, get_item_id_proc, get_item_name_proc, get_item_icon_proc, get_item_children_proc, get_item_parent_proc)
             if include_parents
                 while get_item_parent_proc.call(item) != nil && (root_item_id == nil || get_item_id_proc.call(item) != root_item_id)
-                    result = _recurse_live_tree_data(get_item_parent_proc.call(item), 2, get_item_id_proc, get_item_name_proc, get_item_children_proc, get_item_parent_proc, get_item_id_proc.call(item), result)
+                    result = _recurse_live_tree_data(get_item_parent_proc.call(item), 2, get_item_id_proc, get_item_name_proc, get_item_icon_proc, get_item_children_proc, get_item_parent_proc, get_item_id_proc.call(item), result)
                     item = get_item_parent_proc.call(item)
                 end	
             end			
@@ -171,7 +218,7 @@ module LiveTree
             else
                 tree_id = name
             end
-            for k in [:on_click_item, :on_expand_item, :on_collapse_item, :on_load_item]
+            for k in [:on_click_item, :on_context_menu, :on_expand_item, :on_collapse_item, :on_load_item]
                 if options[k] != nil
                     options[k] = "function(item){" + options[k] + "}"
                 end
@@ -247,19 +294,27 @@ module LiveTree
     #
     # Arguments:
     # * +item+ - Item to return.
-    # * +options+ - May contain the following:
-    #   * <tt>:get_item_id_proc</tt> - Proc object which, when called with an item, returns the id of the item to display. (by default, the item's name is retrieved using the object's +id+ attribute).
-    #   * <tt>:get_item_name_proc</tt> - Proc object which, when called with an item, returns the name of the item to display. (by default, the item's name is retrieved using the object's +name+ attribute).
-    #   * <tt>:get_item_children_proc</tt> - Proc object which, when called with an item, returns the item's children. (by default, the item's children are retrieved using the object's +children+ attribute).
-    #   * <tt>:get_item_parent_proc</tt> - Proc object which, when called with an item, returns the item's parent. (by default, the item's parent is retrieved using the object's +parent+ attribute).
-    def get_live_tree_data(item, options = {})	
-        #Kernel.sleep(10); #XXX
+    # * +options+ - May contain the following:   
+    #   * <tt>:item_id_attribute</tt> - name of model attribute that returns the id of the item to display. If not specified, the item's id is retrieved using the object's +id+ attribute..
+    #   * <tt>:get_item_id_proc</tt> - proc object which, when called with an item, returns the id of the item to display. If not specified, the item's id is retrieved using the object's +id+ attribute..
+    #   * <tt>:item_name_attribute</tt> - name of model attribute that returns the name of the item to display.  If not specified, the item's name is retrieved using the object's +name+ attribute.
+    #   * <tt>:render_item_name</tt> - arguments to +render+ to render the name of the item.  It is passed a a local variable called +item+.  If not specified, the item's name is retrieved using the object's +name+ attribute.
+    #   * <tt>:get_item_name_proc</tt> - proc object which, when called with an item, returns the name of the item to display.  If not specified, the item's name is retrieved using the object's +name+ attribute.
+    #   * <tt>:render_item_icon</tt> - arguments to +render+ to render the item's icon.  It is passed a a local variable called +item+.  If not specified, the item does not have an icon.
+    #   * <tt>:item_children_attribute</tt> - name of model attribute that returns the item's children.  If not specified, the item's +children+ attribute is used.
+    #   * <tt>:get_item_children_proc</tt> - proc object which, when called with an item, returns the item's children.  If not specified, the item's +children+ attribute is used.
+    #   * <tt>:item_parent_attribute</tt> - name of model attribute that returns the item's parent.  If not specified, the item's <tt>parent</tt> attribute is used
+    #   * <tt>:get_item_parent_proc</tt> - proc object which, when called with an item, returns the item's parent.  If not specified, the item's <tt>parent</tt> attribute is used
+    def get_live_tree_data(item, options = {})
+        #Kernel.sleep(1); #XXX
         render :inline => '<%= _get_live_tree_data(item, options, params) %>', :locals => { :item => item, :options => options }
     end
+    protected :get_live_tree_data
 
     # Returns the value of the item ID from the request's params.
     def live_tree_item_id
         params[:item_id]
     end
+    protected :get_live_tree_data
     
 end

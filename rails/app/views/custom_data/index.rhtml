@@ -19,6 +19,12 @@
     <%= javascript_tag(construct_live_tree_function("my_tree", :data_action => 'my_live_tree_data', :root_item_id => 'Root') + ".render()") %>
 </div></p>
 
-<p><a href="/">See other demos</a>.</p>
+<p>
+View source code:
+<%= link_to "controller", { :controller => "file_system", :initial_file => "/app/controllers/custom_data_controller.rb" }, { :target => "live_tree_source" } %>
+<%= link_to "view", { :controller => "file_system", :initial_file => "/app/views/custom_data/index.rhtml" }, { :target => "live_tree_source" } %>
+&nbsp;&nbsp;&nbsp;
+<a href="/">See other demos</a>
+</p>
 
 </body></html>

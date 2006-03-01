@@ -1,8 +1,36 @@
 === ???
 
+Client:
+
+* !! BREAKING CHANGE: Items no longer have isLeaf and isLoaded attributes.  Use <tt>tree.isLeaf(itemId)</tt> and <tt>tree.isLoaded(itemId)</t> instead.
+* !! Added <tt>reloadChildrenOfItem()</tt> method.
+* !! Added <tt>getActiveItem()</tt> method.
+* !! Added <tt>isItemChildOf()</tt> method.
+* !! Added +notLoadedIconHtml+ and +notLoadedItemHtml+ options.
+* !! Added +onContextMenu+ event.
+* !! BREAKING CHANGE: CSS: Changed +live_tree_item_icon+ class to +live_tree_item_branching_icon+.
+* !! BREAKING CHANGE: CSS: Changed +live_tree_branch_expand_collapse_link+ to +live_tree_branching_link+.
+
+Rails Server:
+
+* !! Added the following parameters for LiveTree::ClassMethods.live_tree:
+  * <tt>:find_item_method</tt>
+  * <tt>:item_id_attribute</tt>
+  * <tt>:item_name_attribute</tt>
+  * <tt>:render_item_name</tt>
+  * <tt>:render_item_icon</tt>
+  * <tt>:item_children_attribute</tt>
+  * <tt>:item_parent_attribute</tt>
+* !! Support client's +onContextMenu+ option through <tt>:on_context_menu</tt> option.
+  
+<tt>:item_name_attribute</tt>, etc. XXX
+
 Demos:
 
-* Added file system browser demo
+* Added file system browser demo.
+* !! Added links to relevant source files in all demos.
+
+!! Updated file system browser demo.
 
 === 0.1.2 - January 29, 2006
 

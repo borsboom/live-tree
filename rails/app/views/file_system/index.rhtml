@@ -4,20 +4,78 @@
     <%= stylesheet_link_tag('live_tree') %>	
     <%= javascript_include_tag "prototype" %>
     <%= javascript_include_tag "live_tree" %>
+    <script type="text/javascript">	
+        function onClickItem(tree, itemId) {
+            //alert("clicked on " + itemIid);
+            tree.activateItem(itemId);
+            $('file_contents').innerHTML = '<%= escape_javascript(image_tag("live_tree_loading_spinner.gif", :alt => "")) %> Loading file&hellip;'; 
+            new Ajax.Updater('file_contents', '<%= escape_javascript(url_for({ :action => "file_contents" })) %>?path=' + escape(itemId), {evalScripts:true, asynchronous:true})
+        }
+        function jumpTo(tree, path) {
+            tree.expandParentsOfItem(path); 
+            onClickItem(tree, path)
+        }
+    </script>
+    <style type="text/css" media="screen">
+        body {
+            background-color: white;
+            color: black;
+            font-family: "Lucida Grande", "Bitstream Vera Sans", "Verdana";
+            font-size: 13px;
+        }
+        .live_tree_item_indent {
+            margin-left: 1.4em;
+        }        
+        .live_tree_item_icon img {
+            width: 16px;
+            height: 16px;
+        }
+    </style>
 </head><body>
 
-<h2>LiveTree File System Demo</h2>
+<h2 style="margin-top:0px;margin-bottom:5px">LiveTree File System Demo</h2>
 
-<p><div style="width:300px;height:415px">
+<div style="position:relative;left:0;top:0">
+
+<div id="file_contents" style="position:absolute;top:0px;left:270px;height:550px;width:640px;border:1px solid black;padding:5px;overflow:auto">
+    <% if @initial_file %>
+        <%= render :partial => 'file_system/file_contents', :locals => { :path => @initial_file, :file_contents => @initial_file_contents } %>    
+    <% else %>
+        (click a file to view it)
+    <% end %>
+</div>
+
+<div style="position:absolute;top:0px;left:0px;width:250px;height:550px">
     <%= live_tree :fstree, 
                   :initial_data_root => @fsroot,
-                  :on_click_item => "this.activateItem(item.id)" %>
-</div></p>
+                  :allow_click_branch => false,
+                  :on_click_item => "onClickItem(this, item.id)"
+    %>
+    <% if @initial_file %>
+        <%= javascript_tag "fstree.expandParentsOfItem('" + escape_javascript(@initial_file) + "'); fstree.activateItem('" + escape_javascript(@initial_file) + "');" %>
+    <% end %>
+</div>
 
-<p>
-    <%= link_to_function "Jump to live_tree.rb", "fstree.expandParentsOfItem('/vendor/plugins/live_tree/lib/live_tree.rb'); fstree.activateItem('/vendor/plugins/live_tree/lib/live_tree.rb')" %>
-    &nbsp;&nbsp;&nbsp;
-    <a href="/">See other demos</a>
-</p>
+<div style="position:absolute;top:570px;left:0px">
+    <p>
+        <%= link_to_function("Reload tree", "fstree.reloadChildrenOfItem('/')") %>
+        <%= link_to_function("Reload /app folder", "fstree.reloadChildrenOfItem('/app')") %>
+    </p>
+    <p>
+        View source code: 
+        model (<%= link_to_function "file_system_item", "jumpTo(fstree, '/app/models/file_system_item.rb')" %>)
+        |
+        controller (<%= link_to_function "file_system", "jumpTo(fstree, '/app/controllers/file_system_controller.rb')" %>)
+        |
+        view (<%= link_to_function "index", "jumpTo(fstree, '/app/views/file_system/index.rhtml')" %>,
+        <%= link_to_function "_file_contents", "jumpTo(fstree, '/app/views/file_system/_file_contents.rhtml')" %>
+        <%= link_to_function "_item_icon", "jumpTo(fstree, '/app/views/file_system/_item_icon.rhtml')" %>
+        <%= link_to_function "_item_name", "jumpTo(fstree, '/app/views/file_system/_item_name.rhtml')" %>)
+        &nbsp;&nbsp;&nbsp;
+        <a href="/">See other demos</a>
+    </p>
+</div>
+
+</div>
 
 </body></html>

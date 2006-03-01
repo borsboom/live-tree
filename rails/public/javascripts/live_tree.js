@@ -45,11 +45,14 @@ function LiveTree(id, options) {
     this.expandedItemIconHtml = options.expandedItemIconHtml;
     this.leafIconHtml = options.leafIconHtml;
     this.loadingIconHtml = options.loadingIconHtml;
+    this.notLoadedIconHtml = options.notLoadedIconHtml;
     this.loadingTreeHtml = options.loadingTreeHtml;
     this.searchingHtml = options.searchingHtml;
     this.loadingItemHtml = options.loadingItemHtml;
+    this.notLoadedItemHtml = options.notLoadedItemHtml;
 
     this.onClickItem = options.onClickItem;
+	this.onContextMenu = options.onContextMenu;    
     this.allowClickBranch = (options.allowClickBranch == null ? true : options.allowClickBranch);
     this.allowClickLeaf = (options.allowClickLeaf == null ? true : options.allowClickLeaf);
     this.onExpandItem = options.onExpandItem;
@@ -58,11 +61,12 @@ function LiveTree(id, options) {
     
     this._root = {};
     this._itemsIndex = {};
+    this._expandedItems = {};
     this._activeItemId = null;
     this._scrollToItemIdOnLoad = null;
     this._scrollToItemMustBeExpanded = false;
     this._searchCount = 0;
-    this._preloadCount = 0;
+    this._autoloadCount = 0;
     this._updateItemDisplay = null;
 }
 
@@ -91,7 +95,6 @@ LiveTree.prototype._getClass = function (suffix) {
 }
 
 LiveTree.prototype._escapeId = function (itemId) {
-    //XXX find out exactly what characters are allowed in HTML id
     return escape(itemId);
 }
 
@@ -99,7 +102,7 @@ LiveTree.prototype._getCollapsedItemIconHtml = function (item) {
     if (this.collapsedItemIconHtml != null) {
         return this.collapsedItemIconHtml;
     } else {
-        return '<img src="/images/live_tree_transparent_pixel.gif" alt="&gt;" id="' + this.id + '_item_icon_' + this._escapeId(item.id) + '" class="' + this._getClass("item_icon") + ' ' + this._getClass("branch_collapsed_icon") + '" />';
+        return '<img src="/images/live_tree_transparent_pixel.gif" alt="&gt;" id="' + this.id + '_item_branching_icon_' + this._escapeId(item.id) + '" class="' + this._getClass("item_branching_icon") + ' ' + this._getClass("branch_collapsed_icon") + '" />';
     }
 }
 
@@ -107,7 +110,7 @@ LiveTree.prototype._getExpandedItemIconHtml = function (item) {
     if (this.expandedItemIconHtml != null) {
         return this.expandedItemIconHtml;
     } else {
-        return '<img src="/images/live_tree_transparent_pixel.gif" alt="v" id="' + this.id + '_item_icon_' + this._escapeId(item.id) + '" class="' + this._getClass("item_icon") + ' ' + this._getClass("branch_expanded_icon") + '" />';
+        return '<img src="/images/live_tree_transparent_pixel.gif" alt="v" id="' + this.id + '_item_branching_icon_' + this._escapeId(item.id) + '" class="' + this._getClass("item_branching_icon") + ' ' + this._getClass("branch_expanded_icon") + '" />';
     }
 }
 
@@ -115,7 +118,7 @@ LiveTree.prototype._getLeafIconHtml = function (item) {
     if (this.leafIconHtml != null) {
         return this.leafIconHtml;
     } else {
-        return '<img src="/images/live_tree_transparent_pixel.gif" alt=" " id="' + this.id + '_item_icon_' + this._escapeId(item.id) + '" class="' + this._getClass("item_icon") + ' ' + this._getClass("leaf_icon") + '" />';
+        return '<img src="/images/live_tree_transparent_pixel.gif" alt=" " id="' + this.id + '_item_branching_icon_' + this._escapeId(item.id) + '" class="' + this._getClass("item_branching_icon") + ' ' + this._getClass("leaf_icon") + '" />';
     }
 }
 
@@ -123,7 +126,15 @@ LiveTree.prototype._getLoadingIconHtml = function () {
     if (this.loadingIconHtml != null) {
         return this.loadingIconHtml;
     } else {
-        return '<img src="/images/live_tree_loading_spinner.gif" alt="[loading]" class="' + this._getClass("loading_icon") + '" />';
+        return '<img src="/images/live_tree_transparent_pixel.gif" alt="[loading]" class="' + this._getClass("loading_icon") + '" />';
+    }
+}
+
+LiveTree.prototype._getNotLoadedIconHtml = function () {
+    if (this.notLoadedIconHtml != null) {
+        return this.notLoadedIconHtml;
+    } else {
+        return '<img src="/images/live_tree_transparent_pixel.gif" alt="[not loaded]" class="' + this._getClass("not_loaded_icon") + '" />';
     }
 }
 
@@ -151,35 +162,91 @@ LiveTree.prototype._getLoadingItemHtml = function () {
     }
 }
 
-LiveTree.prototype._startPreloads = function (item) {
+LiveTree.prototype._getNotLoadedItemHtml = function () {
+    if (this.notLoadedItemHtml != null) {
+        return this.notLoadedItemHtml;
+    } else {
+        return this._getNotLoadedIconHtml() + '(not loaded)';
+    }
+}
+
+LiveTree.prototype._isLeaf = function (item) {
+    return item.children != null && item.children.length == 0;
+}
+
+LiveTree.prototype.isLeaf = function (itemId) {
     var tree = this;
-    if (!tree.preloadItems || tree._preloadCount > 0) {
+    return tree._isLeaf(tree._getItem(itemId));
+}
+
+LiveTree.prototype._isLoaded = function (item) {
+    return item.children != null;
+}
+
+LiveTree.prototype.isLoaded = function (itemId) {
+    var tree = this;
+    return tree._isLoaded(tree._getItem(itemId));
+}
+
+LiveTree.prototype._isExpanded = function (item) {
+    var tree = this;
+    if (item == tree._root) {
+        return true;
+    } else {
+        return tree.isExpanded(item.id);
+    }
+}
+
+LiveTree.prototype.isExpanded = function (itemId) {
+    var tree = this;
+    return tree._expandedItems[itemId] != null;
+}
+
+LiveTree.prototype._isLoadingBackground = function (item) {
+    var tree = this;
+    return item.isLoading && !tree._isExpanded(item);
+}
+
+LiveTree.prototype._startAutoloads = function (item) {
+    var tree = this;
+    if (tree._autoloadCount > 0) {
         return false;
     }
     if (item == null) {
         item = tree._root;
     }
-    //alert("XXX startPreloads " + item.id);
-    if (!item.isExpanded || item.isLoading) {
+    //alert("XXX startAutoloads " + item.id);
+    if (!tree._isExpanded(item) || item.isLoading) {
         return false;
+    }    
+    if (!tree._isLoaded(item))
+    {
+        tree._autoloadCount++;
+        item.isLoading = true;
+        tree._requestItem(item.id, 2, tree._onAutoExpandItemReceived.bind(tree))
+        tree._markItemForUpdateDisplay(item);        
+        return true;
     }
     var tailBranch = true;
     for (var i = 0; i < item.children.length; i++) {
         var child = item.children[i];
-        if (!child.isLeaf && ( child.isLoaded || child.isLoading )) {
+        if (!tree._isLeaf(child) && (tree._isLoaded(child) || child.isLoading)) {
             tailBranch = false;
         }
     }
     var doLoad = false;
+    var childExpanded = false;
     if (tailBranch) {
         for (var i = 0; i < item.children.length; i++) {
             var child = item.children[i];
-            if (!child.isLeaf) {
-                if (!child.isLoaded && !child.isLoading) {
-                    //alert("setting loading for " + child.id);
+            if (!tree._isLeaf(child)) {
+                if (!tree._isLoaded(child) && !child.isLoading && tree.preloadItems) {
+                    //alert("XXX setting loading for " + child.id);
                     doLoad = true;
+                    if (tree._isExpanded(child)) {
+                        childExpanded = true;                        
+                    }
                     child.isLoading = true;
-                    child.isLoadingBackground = true;
                 }
             }
         }
@@ -187,21 +254,21 @@ LiveTree.prototype._startPreloads = function (item) {
     var didLoad = false;
     if (doLoad) {
         //alert("XXX preloading children of " + item.id);
-        tree._preloadCount++;
+        tree._autoloadCount++;
         if (item == tree._root) {
             tree._requestItem(tree._root.children[0].id, 2, tree._onPreloadItemReceived.bind(tree));	
         } else {
             tree._requestItem(item.id, 3, tree._onPreloadItemReceived.bind(tree));	
         }
-        if (LiveTree.DEV_SHOW_PRELOADS) {
+        if (childExpanded || LiveTree.DEV_SHOW_PRELOADS) {
             tree._markItemForUpdateDisplay(item);
         }
         didLoad = true;
     } else {
         for (var i = 0; i < item.children.length; i++) {
             var child = item.children[i];
-            if (!child.isLeaf && child.isLoaded) {
-                if (tree._startPreloads(child)) {
+            if (!tree._isLeaf(child)) {
+                if (tree._startAutoloads(child)) {
                     didLoad = true;
                 }
             }
@@ -216,7 +283,7 @@ LiveTree.prototype._stopLoading = function () {
     function recurse(item) {
         if (item.isLoading) {
             item.isLoading = false;
-            item.isExpanded = false;
+            tree._expandedItems[item.id] = null;
         }		
         if (item.children != null) {
             for (var i = 0; i < item.children.length; i++) {
@@ -227,45 +294,61 @@ LiveTree.prototype._stopLoading = function () {
     recurse(tree._root);
     tree._markItemForUpdateDisplay(tree._root);
     tree._searchCount = 0;
-    tree._preloadCount = 0;
+    tree._autoloadCount = 0;
     tree._updateDisplay();
 }
 
 LiveTree.prototype._onItemFailure = function (request) {
     alert("LiveTree error: could not get data from server: HTTP error: " + request.status);
-    //alert(request.responseText); //XXX
+    //alert("XXX " + request.responseText);
     this._stopLoading();
 }
 
+LiveTree.prototype._ajaxRequestItem = function(requestOptions, onItemCallback) {
+    var tree = this;
+    var url = tree.dataUrl;
+    var delim = "?";
+    if (requestOptions.itemId != null) {
+        url += delim + "item_id=" + escape(requestOptions.itemId);
+        delim = "&";
+    }
+    if (requestOptions.depth != null) {
+        url += delim + "depth=" + requestOptions.depth;
+        delim = "&";
+    }
+    if (requestOptions.includeParents) {
+        url += delim + "include_parents=1";
+        delim = "&";
+    }
+    if (requestOptions.rootItemId != null) {
+        url += delim + "root_item_id=" + escape(requestOptions.rootItemId);
+        delim = "&";        
+    }
+    new Ajax.Request(url, {onSuccess: function (request) { tree._onItemResponse(request, onItemCallback, requestOptions) }, onFailure: tree._onItemFailure.bind(tree), evalScripts:true, asynchronous:true, method:"get"});
+    return true;    
+}
+
 LiveTree.prototype._requestItem = function (itemId, depth, onItemCallback, options) {
-    var tree = this;	
+    var tree = this;
     if (options == null) {
         options = {};
     }
-    var url = tree.dataUrl;
-    var requestOptions = new Object();
-    var delim = "?";
+    var requestOptions = {};
     if (itemId != null) {
         requestOptions.itemId = itemId;
-        url += delim + "item_id=" + escape(itemId);		
-        delim = "&";
     }
     if (depth != null) {
         requestOptions.depth = depth;
-        url += delim + "depth=" + depth;
-        delim = "&";
     }
     if (options.includeParents) {
         requestOptions.includeParents = true;
         requestOptions.rootItemId = tree.rootItemId;
-        url += delim + "include_parents=1&root_item_id=" + escape(tree.rootItemId);
-        tree._searchCount++;
+        tree._searchCount++;        
     }
     if (options.initialRequest) {
         requestOptions.initialRequest = true;
     }
-    new Ajax.Request(url, {onSuccess: function (request) { tree._onItemResponse(request, onItemCallback, requestOptions) }, onFailure: tree._onItemFailure.bind(tree), evalScripts:true, asynchronous:true, method:"get"});
-    return true;
+    return tree._ajaxRequestItem(requestOptions, onItemCallback);
 }
 
 LiveTree.prototype._onExpandItemReceived = function (item, requestOptions) {
@@ -273,22 +356,33 @@ LiveTree.prototype._onExpandItemReceived = function (item, requestOptions) {
     //alert("XXX _onExpandItemReceived item.id=" + item.id);
     item.isLoading = false;
     tree._markItemForUpdateDisplay(item);
-    tree._startPreloads();
+    tree._startAutoloads();
     tree._updateDisplay();	
+}
+
+
+
+LiveTree.prototype._onAutoExpandItemReceived = function (item, requestOptions) {
+    var tree = this;
+    if (tree._autoloadCount <= 0) {
+        return;
+    }
+    tree._autoloadCount--;
+    tree._onExpandItemReceived(item, requestOptions);    
 }
 
 LiveTree.prototype._onPreloadItemReceived = function (item, requestOptions) {
     var tree = this;
-    if (tree._preloadCount <= 0) {
+    if (tree._autoloadCount <= 0) {
         return;
     }
     //alert("XXX got preload item");
-    tree._preloadCount--;
+    tree._autoloadCount--;
     item.isLoading = false;
     for (var i = 0; i < item.children.length; i++) {
-        item.children[i].isLoading = false;		
+        item.children[i].isLoading = false;
     }
-    tree._startPreloads();
+    tree._startAutoloads();
     tree._markItemForUpdateDisplay(item);
     tree._updateDisplay();	
 }
@@ -311,10 +405,10 @@ LiveTree.prototype._onClickExpand = function (item) {
 
 LiveTree.prototype._onClickCollapse = function (item) {
     var tree = this;
-    if (!item.isExpanded) {
+    if (!tree._isExpanded(item)) {
         return;
     }
-    item.isExpanded = false;
+    tree._expandedItems[item.id] = null;
     tree._markItemForUpdateDisplay(item);
     tree._updateDisplay();	
     if (tree.onCollapseItem != null) {
@@ -324,10 +418,10 @@ LiveTree.prototype._onClickCollapse = function (item) {
 
 LiveTree.prototype._onClickItem = function (item) {
     var tree = this;
-    if (tree.expandItemOnClick && !item.isExpanded && !item.isLeaf) {
+    if (tree.expandItemOnClick && !tree._isExpanded(item) && !tree._isLeaf(item)) {
         tree._onClickExpand(item);		
     }
-    if (tree.onClickItem != null && ((tree.allowClickLeaf && item.isLeaf) || (tree.allowClickBranch && !item.isLeaf))) {
+    if (tree.onClickItem != null && ((tree.allowClickLeaf && tree._isLeaf(item)) || (tree.allowClickBranch && !tree._isLeaf(item)))) {
         tree.onClickItem(item);
     }
     tree._updateDisplay();
@@ -353,9 +447,9 @@ LiveTree.prototype._isRootItem = function (item) {
 LiveTree.prototype._renderItemHeading = function (item) {
     var tree = this;
     var html = '';
-    if (!item.isLeaf) {
-        html += '<a href="#" id="' + tree.id + '_branch_expand_collapse_link_' + tree._escapeId(item.id) + '" class="' + this._getClass("branch_expand_collapse_link") + '">';
-        if (item.isExpanded) {
+    if (!tree._isLeaf(item)) {
+        html += '<a href="#" id="' + tree.id + '_item_branching_link_' + tree._escapeId(item.id) + '" class="' + this._getClass("item_branching_link") + '">';
+        if (tree._isExpanded(item)) {
             html += tree._getExpandedItemIconHtml(item);
         } else {
             html += tree._getCollapsedItemIconHtml(item);
@@ -364,14 +458,19 @@ LiveTree.prototype._renderItemHeading = function (item) {
     } else {
         html += tree._getLeafIconHtml(item);
     }
+    
+    if (item.icon != null) {
+        html += '<span id="' + tree.id + '_item_icon_' + tree._escapeId(item.id) + '" class="' + this._getClass("item_icon") + '">' + item.icon + '</span>';
+    }
+    
     var itemLinkExists = false;
     var extraNameClass = "";
     if (item.id == tree._activeItemId) {
         extraNameClass = " " + this._getClass("active_item_name");
-    }
+    }    
     var name_html = '<span id="' + tree.id + '_item_name_' + tree._escapeId(item.id) + '" class="' + this._getClass("item_name") + extraNameClass + '">' + item.name + '</span>';
-    if (((tree.onClickItem != null && ((tree.allowClickLeaf && item.isLeaf) || (tree.allowClickBranch && !item.isLeaf))) ||
-            (tree.expandItemOnClick && !item.isLeaf && !item.isExpanded)) && !item.isLoadingDisplay) {
+    if (((tree.onClickItem != null && ((tree.allowClickLeaf && tree._isLeaf(item)) || (tree.allowClickBranch && !tree._isLeaf(item)))) ||
+            (tree.expandItemOnClick && !tree._isLeaf(item) && !tree._isExpanded(item))) && !item.isMessageDisplay) {
         name_html = '<a href="#" id="' + tree.id + '_item_link_' + tree._escapeId(item.id) + '" class="' + this._getClass("item_link") + '">' + name_html + '</a>';
         itemLinkExists = true;
     }
@@ -380,20 +479,23 @@ LiveTree.prototype._renderItemHeading = function (item) {
     }
     html += name_html;
     if (LiveTree.DEV_SHOW_PRELOADS) {
-        if (item.isLoading && item.isLoadingBackground) {
+        if (tree._isLoadingBackground(item)) {
             html += " " + tree._getLoadingIconHtml();
         }
     }
     $(tree.id + "_item_heading_" + tree._escapeId(item.id)).innerHTML = html;
-    if (!item.isLeaf) {
-        if (item.isExpanded) {
-            $(tree.id + '_branch_expand_collapse_link_' + tree._escapeId(item.id)).onclick = function () { tree._onClickCollapse(item); return false }		
+    if (!tree._isLeaf(item)) {
+        if (tree._isExpanded(item)) {
+            $(tree.id + '_item_branching_link_' + tree._escapeId(item.id)).onclick = function () { tree._onClickCollapse(item); return false }		
         } else {
-            $(tree.id + '_branch_expand_collapse_link_' + tree._escapeId(item.id)).onclick = function () { tree._onClickExpand(item); return false }
+            $(tree.id + '_item_branching_link_' + tree._escapeId(item.id)).onclick = function () { tree._onClickExpand(item); return false }
         }
     }
     if (itemLinkExists) {
         $(tree.id + '_item_link_' + tree._escapeId(item.id)).onclick = function() { tree._onClickItem(item); return false }
+    }    
+    if (tree.onContextMenu != null) {
+        $(tree.id + '_item_name_' + tree._escapeId(item.id)).oncontextmenu = function() { return tree.onContextMenu(item) }
     }
 }
 
@@ -402,7 +504,7 @@ LiveTree.prototype._hideItem = function (child) {
     var elem = tree._getItemElement(child.id);
     if (elem) {
         $(tree.id).removeChild(elem);
-        if (child.isLoaded || (child.isLoading && !child.isLoadingBackground)) {
+        if (tree._isLoaded(child) || (child.isLoading && !tree._isLoadingBackground(child))) {
             tree._hideItemChildren(child);
         }
     }
@@ -411,12 +513,12 @@ LiveTree.prototype._hideItem = function (child) {
 LiveTree.prototype._hideItemChildren = function (item) {
     var tree = this;
     tree._hideItem(tree._getLoadingDisplayChild(item));
-    if (!item.isLoading) {
+    tree._hideItem(tree._getNotLoadedDisplayChild(item));
+    if (tree._isLoaded(item)) {
         for (var i = 0; i < item.children.length; i++) {
             tree._hideItem(item.children[i]);
         }
     }
-    item.childrenVisible = false;
 }
 
 LiveTree.prototype._updateItemChildren = function (item, afterElem, indentLevel, containerElem) {
@@ -439,36 +541,44 @@ LiveTree.prototype._updateItemChildren = function (item, afterElem, indentLevel,
             elem = tree._getItemElement(child.id);
         }
         tree._renderItemHeading(child);
-        afterElem = elem;
-        if (child.isLoaded || (child.isLoading && !child.isLoadingBackground)) {
-            afterElem = tree._updateItemChildren(child, afterElem, indentLevel + 1, containerElem);
-        }
+        afterElem = tree._updateItemChildren(child, elem, indentLevel + 1, containerElem);
     }
     
-    if (!item.isExpanded) {
+    if (!tree._isExpanded(item)) {
         tree._hideItemChildren(item);
     } else {
-        if (item.isLoaded) {
+        if (tree._isLoaded(item)) {
             tree._hideItem(tree._getLoadingDisplayChild(item));
+            tree._hideItem(tree._getNotLoadedDisplayChild(item));
             for (var i = 0; i < item.children.length; i++) {	
                 doUpdateChild(item.children[i]);
-            }
-        } else {
+            }        
+        } else if (item.isLoading) {
+            tree._hideItem(tree._getNotLoadedDisplayChild(item));
             doUpdateChild(tree._getLoadingDisplayChild(item));
-        }
-        item.childrenVisible = true;
+        } else {
+            tree._hideItem(tree._getLoadingDisplayChild(item));
+            doUpdateChild(tree._getNotLoadedDisplayChild(item));            
+        }        
     }
+    
     return afterElem;
 }
 
 LiveTree.prototype._getLoadingDisplayChild = function (item) {
     var tree = this;
-    var loadingChild = {id: "___LIVE_TREE_LOADING_" + item.id + "___", 
-                         name: tree._getLoadingItemHtml(), 
-                         children: [], 
-                         isLoadingDisplay: true};
-    tree._setItemDerivedAttributes(loadingChild);
-    return loadingChild;
+    return {id: "___LIVE_TREE_LOADING_" + item.id + "___", 
+             name: tree._getLoadingItemHtml(), 
+             children: [], 
+             isMessageDisplay: true};
+}
+
+LiveTree.prototype._getNotLoadedDisplayChild = function (item) {
+    var tree = this;
+    return {id: "___LIVE_TREE_NOT_LOADED_" + item.id + "___", 
+             name: tree._getNotLoadedItemHtml(), 
+             children: [], 
+             isMessageDisplay: true};
 }
 
 LiveTree.prototype._updateDisplay = function () {
@@ -496,9 +606,7 @@ LiveTree.prototype._updateDisplay = function () {
                 parentItem = parentItem.parent;
             }
             
-            if (updateItem.isLoaded || (updateItem.isLoading && !updateItem.isLoadingBackground)) {
-                tree._updateItemChildren(updateItem, tree._getItemElement(updateItem.id), indentLevel, $(tree.id));
-            }
+            tree._updateItemChildren(updateItem, tree._getItemElement(updateItem.id), indentLevel, $(tree.id));
         }
     }
     tree._checkScrollOnLoad();
@@ -514,9 +622,9 @@ LiveTree.prototype._checkScrollOnLoad = function () {
         return;
     }
     if (tree._scrollToItemMustBeExpanded) {
-        if (item.isLoaded) {
+        if (tree._isLoaded(item)) {
             // The user may have collapsed the item while it was loading, so only scroll to it if it's still expanded.
-            if (item.isExpanded) {
+            if (tree._isExpanded(item)) {
                 tree.scrollToItem(item.id);
             }
             tree._scrollToItemIdOnLoad = null;
@@ -551,6 +659,7 @@ LiveTree.prototype._scrollTo = function (top) {
 }
 
 LiveTree.prototype.scrollToItem = function (itemId) {
+    //alert("XXX scrolling to " + itemId);
     var tree = this;
     if (!tree.scroll) {
         return;
@@ -590,8 +699,8 @@ LiveTree.prototype._expandItem = function (item) {
     var didExpand = false;
     var parent = item.parent;
     while (parent != tree._root && parent != null) {
-        if (!parent.isExpanded) {
-            parent.isExpanded = true;
+        if (!tree._isExpanded(parent)) {
+            tree._expandedItems[parent.id] = true;
             tree._markItemForUpdateDisplay(parent);
             didExpand = true;
         }
@@ -600,13 +709,12 @@ LiveTree.prototype._expandItem = function (item) {
 
     // Expand the selected item
     var needToLoad = false;
-    if (!item.isExpanded) {
+    if (!tree._isExpanded(item)) {
         needToLoad = (item.children == null && !item.isLoading);
         if (needToLoad) {
             item.isLoading = true;
         }
-        item.isLoadingBackground = false;
-        item.isExpanded = true;
+        tree._expandedItems[item.id] = true;
         tree._markItemForUpdateDisplay(item);
         didExpand = true;
     }
@@ -616,7 +724,7 @@ LiveTree.prototype._expandItem = function (item) {
         tree._requestItem(item.id, 2, tree._onExpandItemReceived.bind(tree));	
     }	
 
-    tree._startPreloads();	
+    tree._startAutoloads();	
     return didExpand;
 }
 
@@ -624,7 +732,7 @@ LiveTree.prototype._onExpandItemParentsReceived = function (item, requestOptions
     var tree = this;
     var requestedItem = tree._getItem(requestOptions.itemId);
     this._expandItem(requestedItem);
-    tree._startPreloads();
+    tree._startAutoloads();
     tree._updateDisplay();	
 }
 
@@ -653,7 +761,7 @@ LiveTree.prototype._onExpandParentsOfItemReceived = function (item, requestOptio
     //alert("XXX _onExpandParentsOfItemReceived item.id=" + item.id);
     var requestedItem = tree._getItem(requestOptions.itemId);
     tree._expandItem(requestedItem.parent);
-    tree._startPreloads();
+    tree._startAutoloads();
     tree._updateDisplay();	
 }
 
@@ -708,17 +816,11 @@ LiveTree.prototype.getHtml = function() {
     return html;
 }
 
-LiveTree.prototype._setItemDerivedAttributes = function (child) {
-    child.isLeaf = !(child.children == null || child.children.length > 0);
-    child.isLoaded = child.children != null;
-}
-
 LiveTree.prototype._setupNewItemChildren = function (item) {
     var tree = this;
     if (item.children != null) {
         for (var i = 0; i < item.children.length; i++) {
             var child = item.children[i];
-            tree._setItemDerivedAttributes(child);
             child.parent = item;
             tree._itemsIndex[child.id] = child;
             tree._setupNewItemChildren(child);
@@ -730,12 +832,11 @@ LiveTree.prototype._addNewItems = function (newItem) {
     var tree = this;
     var oldItem = tree._getItem(newItem.id);
     if (newItem.children != null && oldItem != null) {
-        if (!oldItem.isLoaded) {		
+        if (!tree._isLoaded(oldItem)) {
             // Old item has been seen, but its children were not loaded.
             // New item does have children, so add the children to the old item and flag it as as loaded.
             oldItem.children = newItem.children;
             tree._setupNewItemChildren(oldItem);
-            oldItem.isLoaded = true;
         } else {
             // Item is already in the tree and has loaded, so recurse to new item's children
             for (var i = 0; i < newItem.children.length; i++) {
@@ -780,24 +881,23 @@ LiveTree.prototype._onInitialItemReceived = function () {
     if (tree.hideRootItem || tree.expandRootItem) {
         tree._expandItem(tree._root.children[0]);
     }
-    tree._root.isExpanded = true;
     tree._markItemForUpdateDisplay(tree._root);
-    tree._startPreloads();
-    tree._updateDisplay();		
+    tree._startAutoloads();
+    tree._updateDisplay();
 }
 
 LiveTree.prototype._handleInitialItem = function (item) {
     var tree = this;
     tree._root.children = [item];
-    tree._root.isLoaded = true;
     tree._setupNewItemChildren(tree._root);
 }
 
-LiveTree.prototype.start = function() {
+LiveTree.prototype.start = function () {
     var tree = this;	
     if (tree.initialData != null) {
         tree._handleInitialItem(tree.initialData);
         tree._onInitialItemReceived(tree.initialData);
+        tree.initialData = null;
     } else {
         tree._requestItem(tree.rootItemId, (tree.expandRootItem || tree.hideRootItem) ? 2 : 1, tree._onInitialItemReceived.bind(tree), { initialRequest: true });
     }
@@ -807,4 +907,43 @@ LiveTree.prototype.render = function () {
     var tree = this;	
     document.write(tree.getHtml());
     tree.start();
+}
+
+LiveTree.prototype._reloadChildrenOfItem = function (item) {
+    var tree = this;
+    if (item == null || !tree._isLoaded(item)) {
+        return false;
+    }
+    tree._hideItemChildren(item);
+    item.children = null;
+    item.isLoading = true;
+    tree._requestItem(item.id, 2, tree._onExpandItemReceived.bind(tree));	
+    tree._markItemForUpdateDisplay(item);
+    tree._updateDisplay();
+    return true;
+}
+
+LiveTree.prototype.reloadChildrenOfItem = function (itemId) {
+    var tree = this;
+    return tree._reloadChildrenOfItem(tree._getItem(itemId));    
+}
+
+LiveTree.prototype.getActiveItem = function () {
+    var tree = this;
+    return tree._getItem(tree._activeItemId);
+}
+
+LiveTree.prototype.isItemChildOf = function (itemId, parentItemId) {
+    var tree = this;
+    var item = tree._getItem(itemId);
+    if (!item) {
+        return false;
+    }
+    while (item.parent != tree._root) {
+        if (item.parent.id == parentItemId) {
+            return true;
+        }
+        item = item.parent;
+    }
+    return false;
 }

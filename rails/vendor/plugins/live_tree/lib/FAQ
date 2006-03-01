@@ -1,0 +1,20 @@
+= LiveTree Frequently Asked Questions
+
+=== Why am I getting the following error: <tt>LiveTree error: could not get data from server: HTTP error: 500</tt>?
+
+This means the data retrieval action on the server is having some kind of problem.
+Take a look at the Rails server's console output, and you should see a line that looks like this:
+
+    127.0.0.1 - - [20/Feb/2006:16:29:50 Pacific Standard Time] "GET /my_controller/tree_live_tree_data?item_id=1&depth=3 HTTP/1.1" 500 245
+
+Copy-and-paste the part between <tt>GET</tt> and <tt>HTTP</tt>, with "<tt>http://localhost:3000</tt>" prepended, into your web browser's address bar.  For example, for the output line above, you would go to this URL:
+
+    http://localhost:3000/my_controller/tree_live_tree_data?item_id=1&depth=3
+
+Now you should be able to see a detailed error message from the server that will hopefully shed light on what is going on.  Looking at your <tt>development.log</tt> may also help.
+
+This assumes you are running Rails in development mode on port 3000 on your local workstation.  You will have to adjust the URL in other conditions.
+
+=== How do I display multiple trees without a root?
+
+You need to give each tree a common parent in the database, and then use the <tt>hide_root_item</tt> parameter to LiveTree::LiveTreeHelper.live_tree in your view to hide that common parent.

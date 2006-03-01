@@ -1,0 +1,8 @@
+<h2 style="margin-top:0px"><tt><%=h path %></tt>:</h2>
+<% if error %>
+<%=h error %>
+<% elsif image_path %>
+<%= image_tag(url_for(:action => :raw_file_contents, :path => image_path)) %>
+<% else %>
+<pre><%=h file_contents %></pre>
+<% end %>

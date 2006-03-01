@@ -27,10 +27,10 @@
 .live_tree_item_heading {
 }
 
-a.live_tree_branch_expand_collapse_link {
+a.live_tree_item_branching_link {
 }
 
-.live_tree_item_icon {
+.live_tree_item_branching_icon {
     color: #048;
     border-style: none;
     margin-right: 0.5ex;
@@ -56,6 +56,23 @@ a.live_tree_branch_expand_collapse_link {
     margin-right: 0.5ex;
     width: 10px;
     height: 10px;
+    background: url(/images/live_tree_loading_spinner.gif) no-repeat;
+}
+
+.live_tree_not_loaded_icon {
+    margin-right: 0.5ex;
+    width: 10px;
+    height: 10px;
+    background: url(/images/live_tree_question_icon.gif) no-repeat;
+}
+
+.live_tree_item_icon {
+    margin-right: 4px;
+}
+
+.live_tree_item_icon img {
+    position: relative;
+    top: 2px;
 }
 
 a.live_tree_item_link {
@@ -70,3 +87,4 @@ a.live_tree_item_link {
     background-color: #048;
     color: white;
 }
+

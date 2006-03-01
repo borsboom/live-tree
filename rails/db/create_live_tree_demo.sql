@@ -5,7 +5,7 @@ CREATE TABLE `nested_set_items` (
   `lft` int(11) NOT NULL default '0',
   `rgt` int(11) NOT NULL default '0',
   `name` varchar(100) NOT NULL default '',
-  PRIMARY KEY  (`id`)
+  PRIMARY KEY (`id`)
 );
 
 LOCK TABLES `nested_set_items` WRITE;
@@ -24,7 +24,7 @@ CREATE TABLE `other_column_names_items` (
   `parent_widget` char(16) default NULL,
   `widget_description` varchar(100) NOT NULL default '',
   `children_count` int(11) NOT NULL default '0',
-  PRIMARY KEY  (`widget_name`)
+  PRIMARY KEY (`widget_name`)
 );
 
 LOCK TABLES `other_column_names_items` WRITE;
@@ -37,8 +37,6 @@ INSERT INTO `other_column_names_items` VALUES ('C''2"1&foo=bar','C''2"&foo=bar',
 INSERT INTO `other_column_names_items` VALUES ('C''2"2&foo=bar','C''2"&foo=bar','Child 2.2',0);
 UNLOCK TABLES;
 
---quit; --XXX
-
 DROP TABLE IF EXISTS `areas`;
 CREATE TABLE `areas` (
   `id` int(11) NOT NULL auto_increment,
@@ -46,7 +44,7 @@ CREATE TABLE `areas` (
   `name` varchar(100) NOT NULL default '',
   `map_id` int(11) default NULL,
   `children_count` int(11) NOT NULL default '0',
-  PRIMARY KEY  (`id`),
+  PRIMARY KEY (`id`),
   KEY `area_parent_id_idx` (`parent_id`)
 );
 
@@ -902,7 +900,7 @@ CREATE TABLE `map_areas` (
   `shape` enum('poly','rect','circle') NOT NULL default 'poly',
   `coords` varchar(255) NOT NULL default '',
   `area_id` int(11) NOT NULL default '0',
-  PRIMARY KEY  (`id`)
+  PRIMARY KEY (`id`)
 );
 
 LOCK TABLES `map_areas` WRITE;
@@ -952,7 +950,7 @@ DROP TABLE IF EXISTS `maps`;
 CREATE TABLE `maps` (
   `id` int(11) NOT NULL auto_increment,
   `filename` varchar(100) NOT NULL default '',
-  PRIMARY KEY  (`id`)
+  PRIMARY KEY (`id`)
 );
 
 LOCK TABLES `maps` WRITE;

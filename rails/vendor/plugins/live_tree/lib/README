@@ -19,6 +19,7 @@ components can be easily created for just about any web server configuration wit
 Presently, the only existing server component is for Ruby On Rails.  The rest of this document
 specifically addresses using LiveTree with Ruby On Rails.
 
+* If you have problems, check the FAQ[link:files/FAQ.html].
 * The client-side JavaScript component is documented here[link:files/LiveTreeClient.html].
 * The client/server protocol is documented here[link:files/LiveTreeProtocol.html].
 * See STATUS[link:files/STATUS.html] for LiveTree's current development status.
@@ -95,9 +96,9 @@ A controller is used to serve data to the client.  The simplest way to set up yo
 The LiveTree::ClassMethods.live_tree class method sets up your controller to serve data to the client.
 
 By default, it gets a data item's name using the model object's +name+ property.
-You can change that using the <tt>:get_item_name_proc</tt> option.
+You can change that using the <tt>:item_name_attribute</tt> or <tt>:get_item_name_proc</tt> option.
 Also note that the LiveTree does not escape HTML special characters in item names, so your names can
-contain HTML formatting and special characters (and if this is not desirable, you must use the <tt>:get_item_name_proc</tt> option to escape the name using CGI::escapeHTML).
+contain HTML formatting and special characters (and if this is not desirable, you can use the <tt>:get_item_name_proc</tt> option to escape the name using CGI::escapeHTML).
 
 The <tt>show_tree</tt> action defined in the example reads the specified person from the database, which will be the root (top) of the displayed family tree, for use by the view.
 
@@ -148,14 +149,8 @@ If you would prefer to use different names, you may use whatever names you like 
 
 === Using non-ActiveRecord data
 
-If your data is not stored in the database, you can pass <tt>Proc</tt>s to LiveTree::ClassMethods.live_tree to access
-data in just about any format.  See the documentation for the following parameters:
-
-* <tt>:find_item_proc</tt> - proc object which, when called with an ID, returns the item with that ID.
-* <tt>:get_item_id_proc</tt> - proc object which, when called with an item, returns the item's ID.
-* <tt>:get_item_name_proc</tt> - proc object which, when called with an item, returns the name of the item to display.
-* <tt>:get_item_children_proc</tt> - proc object which, when called with an item, returns the item's children.
-* <tt>:get_item_parent_proc</tt> - proc object which, when called with an item, returns the item's parent.
+If your data is not stored in the database, you can pass alternate attribute names or <tt>Proc</tt>s to LiveTree::ClassMethods.live_tree to access
+data in just about any format.  See the documentation for information about these options.
 
 === Creating a custom data action
 

@@ -14,6 +14,14 @@
                   :on_click_item => "alert('Clicked: ' + item.name + ' (id=' + item.id + ')')" %>
 </div></p>
 
-<p><a href="/">See other demos</a>.</p>
+<p>
+View source code:
+<%= link_to "model", { :controller => "file_system", :initial_file => "/app/models/other_column_names_item.rb" }, { :target => "live_tree_source" } %>
+<%= link_to "controller", { :controller => "file_system", :initial_file => "/app/controllers/other_column_names_controller.rb" }, { :target => "live_tree_source" } %>
+<%= link_to "view", { :controller => "file_system", :initial_file => "/app/views/other_column_names/index.rhtml" }, { :target => "live_tree_source" } %>
+&nbsp;&nbsp;&nbsp;
+<a href="/">See other demos</a>
+</p>
+
 
 </body></html>

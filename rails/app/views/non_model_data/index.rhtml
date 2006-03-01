@@ -13,6 +13,13 @@
                   :initial_data_root => @root %>
 </div></p>
 
-<p><a href="/">See other demos</a>.</p>
+<p>
+View source code:
+<%= link_to "controller", { :controller => "file_system", :initial_file => "/app/controllers/non_model_data_controller.rb" }, { :target => "live_tree_source" } %>
+<%= link_to "view", { :controller => "file_system", :initial_file => "/app/views/non_model_data/index.rhtml" }, { :target => "live_tree_source" } %>
+&nbsp;&nbsp;&nbsp;
+<a href="/">See other demos</a>
+</p>
+
 
 </body></html>
