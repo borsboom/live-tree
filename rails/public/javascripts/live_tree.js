@@ -1,4 +1,4 @@
-// LiveTree, version: 0.1.2
+// LiveTree, version: 0.1.3-PRERELEASE
 //
 // Home page: http://www.epiphyte.ca/code/live_tree.html
 //

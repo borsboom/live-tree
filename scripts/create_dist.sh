@@ -1,6 +1,6 @@
 #!/bin/sh
 
-ver=0.1.2
+ver=0.1.3-PRERELEASE
 files="vendor/plugins/live_tree public/images/live_tree* public/javascripts/live_tree* public/stylesheets/live_tree*"
 
 cd /d/LiveTree/src/rails

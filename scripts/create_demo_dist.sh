@@ -1,6 +1,6 @@
 #!/bin/sh
 
-ver=0.1.2.1
+ver=0.1.3-PRERELEASE
 base_files="config/database.yml db/create_live_tree_demo.sql public/index.html"
 areas_files="app/models/area.rb app/models/map.rb app/models/map_area.rb app/controllers/areas_controller.rb app/helpers/areas_helper.rb app/views/areas/index.rhtml app/views/areas/_map.rhtml public/images/area_maps/*.gif"
 nested_set_files="app/models/nested_set_item.rb app/views/nested_set/index.rhtml app/controllers/nested_set_controller.rb app/helpers/nested_set_helper.rb"

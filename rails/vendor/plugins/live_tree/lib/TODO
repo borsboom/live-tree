@@ -17,6 +17,6 @@ This list is not necessarily exhaustive.
   * Force refreshing of folder contents every time the folder is opened
   * Refresh whole tree, but keep same folders open
   * Ability to refresh a folder
-* Pass initial data complete to a certain item so it doesn't need to search when opening to something deep in the tree
-* A way to display an "empty folder"
-* A way to display multiple trees that have no parent or don't have a common parent
+* Pass initial data complete to a certain item so it doesn't need to search when opening to something deep in the tree.
+* A way to display an "empty folder".
+* A way to display multiple trees that have no parent or don't have a common parent.
