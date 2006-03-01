@@ -11,6 +11,17 @@ class CustomDataController < ApplicationController
                     ["Child 2.1", ["Child 2.1.1"], ["Child 2.1.2"], ["Child 2.1.3"]], 
                     ["Child 2.2", ["Child 2.2.1"], ["Child 2.2.2"], ["Child 2.2.3"]]]]
     
+    def my_live_tree_data
+        # Note: you should also provide a get_item_parent_proc in order for searching
+        # to work, but for the purposes of this example it is not needed.
+        get_live_tree_data _find(DATA, live_tree_item_id), 
+                           :get_item_id_proc => Proc.new { |x| x[0] },
+                           :get_item_name_proc => Proc.new { |x| x[0] },
+                           :get_item_children_proc => Proc.new { |x| x[1..x.length] }
+    end
+    
+protected
+
     def _find(root, id)
         if root[0] == id
             return root
@@ -25,12 +36,5 @@ class CustomDataController < ApplicationController
         end
     end
     
-    def my_live_tree_data
-        # Note: you should also provide a get_item_parent_proc in order for searching
-        # to work, but for the purposes of this example it is not needed.
-        get_live_tree_data _find(DATA, live_tree_item_id), 
-                           :get_item_id_proc => Proc.new { |x| x[0] },
-                           :get_item_name_proc => Proc.new { |x| x[0] },
-                           :get_item_children_proc => Proc.new { |x| x[1..x.length] }
-    end
+                       
 end

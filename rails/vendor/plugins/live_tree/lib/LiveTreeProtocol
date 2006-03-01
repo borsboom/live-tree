@@ -33,12 +33,14 @@ It should consist of one object which has the following properties:
 
 * +id+: ID of the returned item (required).
 
-* +name+: Name of the returned item (required).
+* +name+: Name of the returned item, may contain HTML (required).
 
 * +children+: Array of children of this item (optional).  
   This should only be included for items up to the depth requested, with one exception: 
   it _must_ be included if the item has no children.  
   Each child is an object the same format as described here.
+
+* +icon+: HTML to display the icon of the returned item (optional).
 
 If +include_parents+ was specified in the query, 
 the item returned is the item specified by +root_item_id+ 

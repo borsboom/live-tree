@@ -52,12 +52,12 @@ function LiveTree(id, options) {
     this.notLoadedItemHtml = options.notLoadedItemHtml;
 
     this.onClickItem = options.onClickItem;
-	this.onContextMenu = options.onContextMenu;    
     this.allowClickBranch = (options.allowClickBranch == null ? true : options.allowClickBranch);
     this.allowClickLeaf = (options.allowClickLeaf == null ? true : options.allowClickLeaf);
     this.onExpandItem = options.onExpandItem;
     this.onCollapseItem = options.onCollapseItem;
     this.onLoadItem = options.onLoadItem;
+	this.onContextMenu = options.onContextMenu;    
     
     this._root = {};
     this._itemsIndex = {};
