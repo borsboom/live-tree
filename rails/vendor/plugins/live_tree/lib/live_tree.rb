@@ -202,8 +202,13 @@ module LiveTree
         #
         # * +options+ - most of these options are passed to the JavaScript LiveTree object as-is, but their 
         #   names are converted to camelcase-with-lowercase-first-letter (e.g. <tt>:on_click_item</tt> becomes <tt>onClickItem</tt>).  
-        #   See LiveTreeClient[link:files/LiveTreeClient.html] for details details about those options.  In addition, the following may be
-        #   specified:
+        #   See LiveTreeClient[link:files/LiveTreeClient.html] for details details about those options.  
+        #
+        #   The event handling options all take a fragment of JavaScript code as their argument; it is automatically wrapped in a
+        #   function.  The JavaScript code has access to an object named +item+, which is the item that was clicked on, and
+        #   +event+, which contains the original JavaScript event object (if any).
+        #
+        #   In addition, the following may be specified:
         #
         #   * <tt>:id</tt> - HTML ID to give the tree's top HTML element (default is the tree's name).
         #   * <tt>:data_action</tt> - Action used by the tree to read data (default is "#{name}_live_tree_data").
@@ -218,7 +223,12 @@ module LiveTree
             else
                 tree_id = name
             end
-            for k in [:on_click_item, :on_context_menu, :on_expand_item, :on_collapse_item, :on_load_item]
+            for k in [:on_click_item, :on_context_menu, :on_expand_item, :on_collapse_item]
+                if options[k] != nil
+                    options[k] = "function(item,event){" + options[k] + "}"
+                end
+            end
+            for k in [:on_load_item]
                 if options[k] != nil
                     options[k] = "function(item){" + options[k] + "}"
                 end

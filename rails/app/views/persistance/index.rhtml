@@ -1,0 +1,50 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head>
+    <title>LiveTree Persist State Demo</title>
+    <%= stylesheet_link_tag('live_tree') %>	
+    <%= javascript_include_tag "prototype" %>
+    <%= javascript_include_tag "live_tree" %>
+    <%= javascript_tag %q#
+        function getCookie(cookie) {
+            var cookieStart = document.cookie.indexOf(cookie + "=");
+            if (cookieStart != -1) {
+                cookieStart += cookie.length + 1;
+                var cookieEnd = document.cookie.indexOf(";", cookieStart);
+                if (cookieEnd == -1) {
+                    cookieEnd = document.cookie.length;
+                }
+                return document.cookie.substring(cookieStart, cookieEnd);
+            } else {
+                return null;
+            }
+        }        
+    # %>
+</head>
+
+<!-- When the document unloads, we save the tree's state to a cookie -->
+
+<body onunload="document.cookie='treeState=' + escape(tree.getState())">
+
+<h2>LiveTree Persist State Demo</h2>
+
+<p>Expand some branches in the tree, and then hit your browser's reload button.
+The tree will reload its data, but will have the same branches open, and 
+same item selected.</p>
+
+<p><div style="width:300px;height:415px">
+    <%= live_tree :tree,
+                  :initial_data_root => @root,
+                  :on_click_item => "tree.activateItem(item.id)",
+                  :initial_state => "getCookie('treeState')" %> <!-- When the tree loads, we read its initial state from the cookie -->
+</div></p>
+
+<p>
+View source code:
+<%= link_to "controller", { :controller => "file_system", :initial_file => "/app/controllers/persistance_controller.rb" }, { :target => "live_tree_source" } %>
+<%= link_to "view", { :controller => "file_system", :initial_file => "/app/views/persistance/index.rhtml" }, { :target => "live_tree_source" } %>
+&nbsp;&nbsp;&nbsp;
+<a href="/">See other demos</a>
+</p>
+
+</body>
+</html>

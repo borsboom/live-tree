@@ -11,12 +11,9 @@ This list is not necessarily exhaustive.
 * Give some consideration to fall-backs if the browser does not support JavaScript or AJAX.
 * Implement checkboxes next to tree items as an option.
 * Truncate item names intelligently, and display tooltip when hovering that shows whole name
-* Persistance: allow user to leave the page, and come back, and have the same folders open
-* Ability to handle changing trees: manipulate tree on the client side, and update portions of the tree from the server.
-* Ability to refreshing data:
-  * Force refreshing of folder contents every time the folder is opened
-  * Refresh whole tree, but keep same folders open
-  * Ability to refresh a folder
+* Ability to manipulate tree on the client side.
+* Ability to force refreshing of folder's contents every time the folder is opened.
 * Pass initial data complete to a certain item so it doesn't need to search when opening to something deep in the tree.
 * A way to display an "empty folder".
 * A way to display multiple trees that have no parent or don't have a common parent.
+* Default context menu with 'refresh' option.

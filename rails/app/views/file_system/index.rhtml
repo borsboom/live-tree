@@ -39,7 +39,7 @@
 
 <div id="file_contents" style="position:absolute;top:0px;left:270px;height:550px;width:640px;border:1px solid black;padding:5px;overflow:auto">
     <% if @initial_file %>
-        <%= render :partial => 'file_system/file_contents', :locals => { :path => @initial_file, :file_contents => @initial_file_contents } %>    
+        <%= render :partial => 'file_system/file_contents', :locals => { :path => @initial_file, :file_contents => @initial_file_contents, :error => nil, :image_path => nil } %>    
     <% else %>
         (click a file to view it)
     <% end %>

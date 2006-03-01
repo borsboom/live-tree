@@ -68,6 +68,21 @@ function LiveTree(id, options) {
     this._searchCount = 0;
     this._autoloadCount = 0;
     this._updateItemDisplay = null;
+    
+    if (options.initialState != null) {
+        var args = unescape(options.initialState).split("&");
+        for (var i = 0; i < args.length; i++) {
+            var arg = args[i].split("=");
+            if (arg[0] == "a") {
+                this._activeItemId = arg[1];
+            } else if (arg[0] == "e") {
+                var exp = arg[1].split(":");
+                for (var j = 0; j < exp.length; j++) {
+                    this._expandedItems[unescape(exp[j])] = true;
+                }
+            }
+        }
+    }
 }
 
 //LiveTree.DEV_SHOW_PRELOADS = true;
@@ -387,7 +402,7 @@ LiveTree.prototype._onPreloadItemReceived = function (item, requestOptions) {
     tree._updateDisplay();	
 }
 
-LiveTree.prototype._onClickExpand = function (item) {
+LiveTree.prototype._onClickExpand = function (item, event) {
     var tree = this;
     var expanded = tree._expandItem(item);
     tree._updateDisplay();	
@@ -398,12 +413,12 @@ LiveTree.prototype._onClickExpand = function (item) {
             tree._scrollToItemMustBeExpanded = true;
         }
         if (tree.onExpandItem != null) {
-            tree.onExpandItem(item);
+            tree.onExpandItem(item, event);
         }
     }
 }
 
-LiveTree.prototype._onClickCollapse = function (item) {
+LiveTree.prototype._onClickCollapse = function (item, event) {
     var tree = this;
     if (!tree._isExpanded(item)) {
         return;
@@ -412,17 +427,17 @@ LiveTree.prototype._onClickCollapse = function (item) {
     tree._markItemForUpdateDisplay(item);
     tree._updateDisplay();	
     if (tree.onCollapseItem != null) {
-        tree.onCollapseItem(item);
+        tree.onCollapseItem(item, event);
     }
 }
 
-LiveTree.prototype._onClickItem = function (item) {
+LiveTree.prototype._onClickItem = function (item, event) {
     var tree = this;
     if (tree.expandItemOnClick && !tree._isExpanded(item) && !tree._isLeaf(item)) {
-        tree._onClickExpand(item);		
+        tree._onClickExpand(item, event);		
     }
     if (tree.onClickItem != null && ((tree.allowClickLeaf && tree._isLeaf(item)) || (tree.allowClickBranch && !tree._isLeaf(item)))) {
-        tree.onClickItem(item);
+        tree.onClickItem(item, event);
     }
     tree._updateDisplay();
 }
@@ -486,16 +501,16 @@ LiveTree.prototype._renderItemHeading = function (item) {
     $(tree.id + "_item_heading_" + tree._escapeId(item.id)).innerHTML = html;
     if (!tree._isLeaf(item)) {
         if (tree._isExpanded(item)) {
-            $(tree.id + '_item_branching_link_' + tree._escapeId(item.id)).onclick = function () { tree._onClickCollapse(item); return false }		
+            $(tree.id + '_item_branching_link_' + tree._escapeId(item.id)).onclick = function (event) { tree._onClickCollapse(item, event); return false }		
         } else {
-            $(tree.id + '_item_branching_link_' + tree._escapeId(item.id)).onclick = function () { tree._onClickExpand(item); return false }
+            $(tree.id + '_item_branching_link_' + tree._escapeId(item.id)).onclick = function (event) { tree._onClickExpand(item, event); return false }
         }
     }
     if (itemLinkExists) {
-        $(tree.id + '_item_link_' + tree._escapeId(item.id)).onclick = function() { tree._onClickItem(item); return false }
+        $(tree.id + '_item_link_' + tree._escapeId(item.id)).onclick = function(event) { tree._onClickItem(item, event); return false }
     }    
     if (tree.onContextMenu != null) {
-        $(tree.id + '_item_name_' + tree._escapeId(item.id)).oncontextmenu = function() { return tree.onContextMenu(item) }
+        $(tree.id + '_item_name_' + tree._escapeId(item.id)).oncontextmenu = function(event) { return tree.onContextMenu(item, event) }
     }
 }
 
@@ -946,4 +961,22 @@ LiveTree.prototype.isItemChildOf = function (itemId, parentItemId) {
         item = item.parent;
     }
     return false;
+}
+
+LiveTree.prototype.getState = function () {
+    var tree = this;
+    var result = "";
+    if (tree._activeItemId != null) {
+        result += "a=" + escape(tree._activeItemId) + "&";
+    }
+    result += "e=";
+    var first = true;
+    for (var itemId in tree._expandedItems) {
+        if (!first) {
+            result += ":";
+        }
+        result += escape(itemId);
+        first = false;
+    }
+    return result;
 }

@@ -58,6 +58,7 @@
                       #:preload_items => false,
                     
                       :on_click_item => "areaTreeOnClickItem(this, item.id, item.isLeaf, item.isLeaf ? item.parent.id : item.id)",
+                      #:on_context_menu => "alert('context ' + item.id + ' event=' + event);return false",
                       :allow_click_leaf => false,
                       #:allow_click_branch => false,
                       #:expand_item_on_click => false,

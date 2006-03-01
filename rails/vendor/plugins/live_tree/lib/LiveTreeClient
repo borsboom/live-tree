@@ -41,6 +41,7 @@ LiveTree requires the following libraries:
       Each item may also have an optional +icon+ property, which specifies HTML to display the item's icon.
       If no icon is specified, then no icon is displayed.
     
+    * +initialState+ - Initial state of the tree (optional).  Pass in a saved value from the <tt>getState()</tt> method to restore the tree's state.
     * +expandItemOnClick+ - Specifies whether to expand an item when its name is clicked (default +true+).
     * +scroll+ - Specifies whether the tree will automatically scroll so that items are fully visible when expanded and in other cases (default +true+).
     * +collapsedItemIconHtml+ - HTML to display the icon for collapsed items (optional).
@@ -52,15 +53,16 @@ LiveTree requires the following libraries:
     * +notLoadedIconHtml+ - HTML to display the icon for non-loaded items (optional).
     * +notLoadedItemHtml+ - HTML to display when an item's children are not loaded (optional).    
     * +searchingHtml+ - HTML to display when searching for an item (optional).
-    * +onClickItem+ - Function to call when an item is clicked (optional).
     * +allowClickBranch+ - Specifies whether to allow clicking on branches (default +true+).
     * +allowClickLeaf+ - Specifies whether to allow clicking on leaves (default +true+).
+    * +onClickItem+ - Function to call when an item is clicked (optional).
     * +onExpandItem+ - Function to call when an item is expanded (optional).    
     * +onCollapseItem+ - Function to call when an item is collapsed (optional).    
     * +onLoadItem+ - Function to call when an item has finished loading (optional).
     * +onContextMenu+ - Function to call when an item is right-clicked (optional).  If this function returns +true+, the browser's default processing of the right click will continue (ie. it will display its own context menu).  Return +false+ to suppress the browser's default behaviour.
 
-  All of the event handler functions will recieve an +item+ parameter, which has the following properties:
+  All of the event handler functions will recieve +item+ and +event+ arguments.  
+  The +event+ argument is the original JavaScript event object, and the +item+ argument has the following properties:
   
   * +id+ - Item ID.
   * +name+ - Item's name.
@@ -80,3 +82,4 @@ LiveTree requires the following libraries:
 * <tt>reloadChildrenOfItem(itemId)</tt> - Reloads all the children of the specified item from the server.
 * <tt>getActiveItem()</tt> - Returns the ID of the active item, or +null+ if there is no active item.
 * <tt>isItemChildOf(itemId, parentItemId)</tt> - Returns +true+ if the item specified by +itemId+ is a child, child's child, etc. of the item specified by +parentItemId+.
+* <tt>getState()</tt> - Returns a string that represents the current state of the tree.  Suitable for storing in a cookie or on the server, and then passing as the +initialState+ option to restore the tree's state later.
