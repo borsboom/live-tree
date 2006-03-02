@@ -474,8 +474,8 @@ LiveTree.prototype._onContextMenu = function (item, event) {
             contextMenuElem.id = tree.id + "_context_menu";
             Element.addClassName(contextMenuElem, tree._getClass("context_menu"));
             contextMenuElem.innerHTML = '<ul><li><a id="' + tree.id + '_context_menu_refresh' + '"href="#">Refresh</a></li></ul>';
-            contextMenuElem.onmouseout = function () { Element.hide(this); return true; };
-            contextMenuElem.onmouseover = function () { Element.show(this); return true; };
+            contextMenuElem.onmouseout = function () { Element.hide(this); return false; };
+            contextMenuElem.onmouseover = function () { Element.show(this); return false; };
             document.getElementsByTagName("body").item(0).appendChild(contextMenuElem);
         }
         $(tree.id + "_context_menu_refresh").onclick = function (event) { tree.reloadChildrenOfItem(item.id); Element.hide(contextMenuElem); return false; };
@@ -529,16 +529,16 @@ LiveTree.prototype._renderItemHeading = function (item) {
     $(tree.id + "_item_heading_" + tree._escapeId(item.id)).innerHTML = html;
     if (!tree._isLeaf(item)) {
         if (tree._isExpanded(item)) {
-            $(tree.id + '_item_branching_link_' + tree._escapeId(item.id)).onclick = function (event) { tree._onClickCollapse(item, event||window.event); return false; }
+            $(tree.id + '_item_branching_link_' + tree._escapeId(item.id)).onclick = function (e) { tree._onClickCollapse(item, e||window.event); return false; }
         } else {
-            $(tree.id + '_item_branching_link_' + tree._escapeId(item.id)).onclick = function (event) { tree._onClickExpand(item, event||window.event); return false; }
+            $(tree.id + '_item_branching_link_' + tree._escapeId(item.id)).onclick = function (e) { tree._onClickExpand(item, e||window.event); return false; }
         }
     }
     if (itemLinkExists) {
-        $(tree.id + '_item_link_' + tree._escapeId(item.id)).onclick = function (event) { tree._onClickItem(item, event||window.event); return false; }
+        $(tree.id + '_item_link_' + tree._escapeId(item.id)).onclick = function (e) { tree._onClickItem(item, e||window.event); return false; }
     }    
     if (tree.contextMenu || tree.onContextMenu != null) {
-        $(tree.id + '_item_name_' + tree._escapeId(item.id)).oncontextmenu = function (event) { return tree._onContextMenu(item, event||window.event) }
+        $(tree.id + '_item_name_' + tree._escapeId(item.id)).oncontextmenu = function (e) { return tree._onContextMenu(item, e||window.event) }
     }
 }
 

@@ -16,4 +16,3 @@ This list is not necessarily exhaustive.
 * Pass initial data complete to a certain item so it doesn't need to search when opening to something deep in the tree.
 * A way to display an "empty folder".
 * A way to display multiple trees that have no parent or don't have a common parent.
-* Default context menu with 'refresh' option.
