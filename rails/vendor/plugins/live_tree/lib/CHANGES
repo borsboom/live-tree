@@ -2,7 +2,7 @@
 
 Client:
 
-* *BREAKING* *CHANGE*: Items no longer have +isLeaf+, +isLoaded+, and +isExpanded+ attributes.  Use <tt>tree.isLeaf(itemId)</tt>, <tt>tree.isLoaded(itemId)</tt>, and <tt>tree.isExpanded(itemId)</tt> instead.
+* *BREAKING* *CHANGE*: Items no longer have +isLeaf+, +isLoaded+, and +isExpanded+ attributes.  Use <tt>tree.isLeaf(itemId)/tree.isBranch(itemId)</tt>, <tt>tree.isLoaded(itemId)</tt>, and <tt>tree.isExpanded(itemId)</tt> instead.
 * *BREAKING* *CHANGE*: CSS: Changed +live_tree_item_icon+ class name to +live_tree_item_branching_icon+.
 * *BREAKING* *CHANGE*: CSS: Changed +live_tree_branch_expand_collapse_link+ class name to +live_tree_branching_link+.
 * Support for reloading the children of a branch using <tt>reloadChildrenOfItem()</tt> method.
@@ -13,6 +13,7 @@ Client:
 * Original JavaScript +event+ objects get passed to LiveTree event handlers.
 * Added <tt>getActiveItem()</tt> method.
 * Added <tt>isItemChildOf()</tt> method.
+* Added <tt>getItem()</tt> method.
 * Added +notLoadedIconHtml+ and +notLoadedItemHtml+ options.
 
 Rails Server:

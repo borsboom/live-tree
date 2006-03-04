@@ -27,7 +27,9 @@ LiveTree requires the following libraries:
     * +expandRootItem+ - Specifies whether to expand the tree's root item initially (default +true+).
     * +hideRootItem+ - Specifies whether the root item should not be displayed (default +false+).
     * +preloadItems+ - Specifies whether children of an expanded item should be pre-loaded (default +true+).
-    * +contextMenu+ - Specifies whether LiveTree should display its own context menu when items are right-clicked (default +true+).
+    * +allowRefresh+ - Specifies whether LiveTree should allow refreshing an item (default +true+).
+    * +allowRefreshBranch+ - Specifies whether LiveTree should allow refreshing a branch (default +true+).
+    * +allowRefreshLeaf+ - Specifies whether LiveTree should allow refreshing a leaf (default +true+).
     * +rootItemId+ - Specifies the item ID of the root item to display (optional, and un-necessary if +initialData+ is set).
     * +initialData+ - Object that specifies data to display in the tree.  If not specified, initial data will be read from server, causing a delay for the user.  Of the form:
     
@@ -39,8 +41,12 @@ LiveTree requires the following libraries:
     
       Note that item id 5 does not have a +children+ property, which means the children will be loaded from the server when needed.  
       If all the initial data has a +children+ property, LiveTree will never request data from the server.
-      Each item may also have an optional +icon+ property, which specifies HTML to display the item's icon.
+      
+      Each item can also have an optional +icon+ property, which specifies HTML to display the item's icon.
       If no icon is specified, then no icon is displayed.
+      
+      An item can also have property named +isBranch+.  Set to +true+ or +false+, this overrides
+      the default behaviour where any item that has children is considered a branch, and any item without children is a leaf.
     
     * +initialState+ - Initial state of the tree (optional).  Pass in a saved value from the <tt>getState()</tt> method to restore the tree's state.
     * +expandItemOnClick+ - Specifies whether to expand an item when its name is clicked (default +true+).
@@ -63,10 +69,17 @@ LiveTree requires the following libraries:
     * +onContextMenu+ - Function to call when an item is right-clicked (optional).  If this function returns +true+, the browser's default processing of the right click will continue (ie. it will display its own context menu).  Return +false+ to suppress the browser's default behaviour.
 
   All of the event handler functions will recieve +item+ and +event+ arguments.  
-  The +event+ argument is the original JavaScript event object, and the +item+ argument has the following properties:
+  The +event+ argument is the original JavaScript event object, and the +item+ argument contains the item data as received from the server.  It has at least the following properties:
   
   * +id+ - Item ID.
   * +name+ - Item's name.
+  
+  It may also have these properties:
+  
+  * +children+ - Item's child items.
+  * +parent+ - Item's parent item.
+  * +icon+ - Item's icon
+  * Any other values that the server passes along, which you may use in any way you wish.
 
 === Methods
 
@@ -78,9 +91,11 @@ LiveTree requires the following libraries:
 * <tt>expandParentsOfItem(itemId)</tt> - Expand the parents of the specified item.
 * <tt>activateItem(itemId)</tt> - Make the specified item the active item (highlighted).
 * <tt>isLeaf(itemId)</tt> - Returns +true+ if the specified item is a leaf node.
+* <tt>isBranch(itemId)</tt> - Returns +true+ if the specified item is a branch node.
 * <tt>isLoaded(itemId)</tt> - Returns +true+ if the specified branch node's children have been loaded.
 * <tt>isExpanded(itemId)</tt> - Returns +true+ if the specified branch node is expanded.
 * <tt>reloadChildrenOfItem(itemId)</tt> - Reloads all the children of the specified item from the server.
 * <tt>getActiveItem()</tt> - Returns the ID of the active item, or +null+ if there is no active item.
 * <tt>isItemChildOf(itemId, parentItemId)</tt> - Returns +true+ if the item specified by +itemId+ is a child, child's child, etc. of the item specified by +parentItemId+.
 * <tt>getState()</tt> - Returns a string that represents the current state of the tree.  Suitable for storing in a cookie or on the server, and then passing as the +initialState+ option to restore the tree's state later.
+* <tt>getItem(itemId)</tt> Returns the item data for the specified ID, or +null+ if there is no such item.

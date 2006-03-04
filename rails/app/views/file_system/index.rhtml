@@ -2,6 +2,7 @@
 <html><head>
     <title>LiveTree File System Demo</title>
     <%= stylesheet_link_tag('live_tree') %>	
+    <%= stylesheet_link_tag('live_tree_win_icons') %>	
     <%= javascript_include_tag "prototype" %>
     <%= javascript_include_tag "live_tree" %>
     <script type="text/javascript">	
@@ -49,7 +50,8 @@
     <%= live_tree :fstree, 
                   :initial_data_root => @fsroot,
                   :allow_click_branch => false,
-                  :on_click_item => "onClickItem(this, item.id)"
+                  :on_click_item => "onClickItem(this, item.id)",
+                  :allow_refresh_leaf => false
     %>
     <% if @initial_file %>
         <%= javascript_tag "fstree.expandParentsOfItem('" + escape_javascript(@initial_file) + "'); fstree.activateItem('" + escape_javascript(@initial_file) + "');" %>

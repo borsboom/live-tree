@@ -1,3 +1,5 @@
+//XXX on;y allow item.isBranch to be true, and get rid of item.isLeaf
+
 // LiveTree, version: 0.1.3-PRERELEASE
 //
 // Home page: http://www.epiphyte.ca/code/live_tree.html
@@ -40,7 +42,20 @@ function LiveTree(id, options) {
     this.initialData = options.initialData;
     this.scroll = (options.scroll == null ? true : options.scroll);
     this.preloadItems = (options.preloadItems == null ? true : options.preloadItems);
-    this.contextMenu = (options.contextMenu == null ? true : options.contextMenu);
+    
+    if (options.allowRefresh != null) {
+        this.allowRefreshBranch = options.allowRefresh;
+        this.allowRefreshLeaf = options.allowRefresh;
+    } else {
+        this.allowRefreshBranch = true;
+        this.allowRefreshLeaf = true;    
+    }   
+    if (options.allowRefreshBranch != null) {
+        this.allowRefreshBranch = options.allowRefreshBranch;
+    }
+    if (options.allowRefreshLeaf != null) {
+        this.allowRefreshLeaf = options.allowRefreshLeaf;
+    }
     
     this.collapsedItemIconHtml = options.collapsedItemIconHtml;
     this.expandedItemIconHtml = options.expandedItemIconHtml;
@@ -186,13 +201,36 @@ LiveTree.prototype._getNotLoadedItemHtml = function () {
     }
 }
 
+LiveTree.prototype._hasChildren = function (item) {
+    return item.children == null || item.children.length > 0;
+}
+
 LiveTree.prototype._isLeaf = function (item) {
-    return item.children != null && item.children.length == 0;
+    var tree = this;
+    if (item.isBranch != null && item.isBranch)
+    {
+        return false;
+    }
+    if (item.isLeaf != null && item.isLeaf)
+    {
+        return true;
+    }
+    return !tree._hasChildren(item);
 }
 
 LiveTree.prototype.isLeaf = function (itemId) {
     var tree = this;
-    return tree._isLeaf(tree._getItem(itemId));
+    return tree._isLeaf(tree.getItem(itemId));
+}
+
+LiveTree.prototype._isBranch = function (item) {
+    var tree = this;
+    return !tree._isLeaf(item);
+}
+
+LiveTree.prototype.isBranch = function (itemId) {
+    var tree = this;
+    return tree._isBranch(tree.getItem(itemId));
 }
 
 LiveTree.prototype._isLoaded = function (item) {
@@ -201,7 +239,7 @@ LiveTree.prototype._isLoaded = function (item) {
 
 LiveTree.prototype.isLoaded = function (itemId) {
     var tree = this;
-    return tree._isLoaded(tree._getItem(itemId));
+    return tree._isLoaded(tree.getItem(itemId));
 }
 
 LiveTree.prototype._isExpanded = function (item) {
@@ -246,7 +284,7 @@ LiveTree.prototype._startAutoloads = function (item) {
     var tailBranch = true;
     for (var i = 0; i < item.children.length; i++) {
         var child = item.children[i];
-        if (!tree._isLeaf(child) && (tree._isLoaded(child) || child.isLoading)) {
+        if (tree._isBranch(child) && tree._hasChildren(child) && (tree._isLoaded(child) || child.isLoading)) {
             tailBranch = false;
         }
     }
@@ -255,7 +293,7 @@ LiveTree.prototype._startAutoloads = function (item) {
     if (tailBranch) {
         for (var i = 0; i < item.children.length; i++) {
             var child = item.children[i];
-            if (!tree._isLeaf(child)) {
+            if (tree._isBranch(child)) {
                 if (!tree._isLoaded(child) && !child.isLoading && tree.preloadItems) {
                     //alert("XXX setting loading for " + child.id);
                     doLoad = true;
@@ -283,7 +321,7 @@ LiveTree.prototype._startAutoloads = function (item) {
     } else {
         for (var i = 0; i < item.children.length; i++) {
             var child = item.children[i];
-            if (!tree._isLeaf(child)) {
+            if (tree._isBranch(child)) {
                 if (tree._startAutoloads(child)) {
                     didLoad = true;
                 }
@@ -434,8 +472,8 @@ LiveTree.prototype._onClickCollapse = function (item, event) {
 
 LiveTree.prototype._onClickItem = function (item, event) {
     var tree = this;
-    if (tree.expandItemOnClick && !tree._isExpanded(item) && !tree._isLeaf(item)) {
-        tree._onClickExpand(item, event);		
+    if (tree.expandItemOnClick && !tree._isExpanded(item) && tree._isBranch(item) && tree._hasChildren(item)) {
+        tree._onClickExpand(item, event);
     }
     if (tree.onClickItem != null && ((tree.allowClickLeaf && tree._isLeaf(item)) || (tree.allowClickBranch && !tree._isLeaf(item)))) {
         tree.onClickItem(item, event);
@@ -443,7 +481,7 @@ LiveTree.prototype._onClickItem = function (item, event) {
     tree._updateDisplay();
 }
 
-LiveTree.prototype._getItem = function (itemId) {
+LiveTree.prototype.getItem = function (itemId) {
     return this._itemsIndex[itemId];
 }
 
@@ -467,7 +505,7 @@ LiveTree.prototype._onContextMenu = function (item, event) {
             return false;
         }
     }
-    if (tree.contextMenu) {        
+    if ((tree._isBranch(item) && tree.allowRefreshBranch) || (tree._isLeaf(item) && tree.allowRefreshLeaf)) {
         var contextMenuElem = $(tree.id + "_context_menu")
         if (contextMenuElem == null) {
             contextMenuElem = document.createElement("DIV");
@@ -490,7 +528,7 @@ LiveTree.prototype._onContextMenu = function (item, event) {
 LiveTree.prototype._renderItemHeading = function (item) {
     var tree = this;
     var html = '';
-    if (!tree._isLeaf(item)) {
+    if (tree._isBranch(item) && tree._hasChildren(item)) {
         html += '<a href="#" id="' + tree.id + '_item_branching_link_' + tree._escapeId(item.id) + '" class="' + this._getClass("item_branching_link") + '">';
         if (tree._isExpanded(item)) {
             html += tree._getExpandedItemIconHtml(item);
@@ -512,8 +550,8 @@ LiveTree.prototype._renderItemHeading = function (item) {
         extraNameClass = " " + this._getClass("active_item_name");
     }    
     var name_html = '<span id="' + tree.id + '_item_name_' + tree._escapeId(item.id) + '" class="' + this._getClass("item_name") + extraNameClass + '">' + item.name + '</span>';
-    if (((tree.onClickItem != null && ((tree.allowClickLeaf && tree._isLeaf(item)) || (tree.allowClickBranch && !tree._isLeaf(item)))) ||
-            (tree.expandItemOnClick && !tree._isLeaf(item) && !tree._isExpanded(item))) && !item.isMessageDisplay) {
+    if (((tree.onClickItem != null && ((tree.allowClickLeaf && tree._isLeaf(item)) || (tree.allowClickBranch && tree._isBranch(item)))) ||
+            (tree.expandItemOnClick && tree._isBranch(item) && tree._hasChildren(item) && !tree._isExpanded(item))) && !item.isMessageDisplay) {
         name_html = '<a href="#" id="' + tree.id + '_item_link_' + tree._escapeId(item.id) + '" class="' + this._getClass("item_link") + '">' + name_html + '</a>';
         itemLinkExists = true;
     }
@@ -527,7 +565,7 @@ LiveTree.prototype._renderItemHeading = function (item) {
         }
     }
     $(tree.id + "_item_heading_" + tree._escapeId(item.id)).innerHTML = html;
-    if (!tree._isLeaf(item)) {
+    if (tree._isBranch(item) && tree._hasChildren(item)) {
         if (tree._isExpanded(item)) {
             $(tree.id + '_item_branching_link_' + tree._escapeId(item.id)).onclick = function (e) { tree._onClickCollapse(item, e||window.event); return false; }
         } else {
@@ -537,7 +575,7 @@ LiveTree.prototype._renderItemHeading = function (item) {
     if (itemLinkExists) {
         $(tree.id + '_item_link_' + tree._escapeId(item.id)).onclick = function (e) { tree._onClickItem(item, e||window.event); return false; }
     }    
-    if (tree.contextMenu || tree.onContextMenu != null) {
+    if (tree.allowRefreshBranch || tree.allowRefreshLeaf || tree.onContextMenu != null) {
         $(tree.id + '_item_name_' + tree._escapeId(item.id)).oncontextmenu = function (e) { return tree._onContextMenu(item, e||window.event) }
     }
 }
@@ -773,7 +811,7 @@ LiveTree.prototype._expandItem = function (item) {
 
 LiveTree.prototype._onExpandItemParentsReceived = function (item, requestOptions) {
     var tree = this;
-    var requestedItem = tree._getItem(requestOptions.itemId);
+    var requestedItem = tree.getItem(requestOptions.itemId);
     this._expandItem(requestedItem);
     tree._startAutoloads();
     tree._updateDisplay();	
@@ -781,7 +819,7 @@ LiveTree.prototype._onExpandItemParentsReceived = function (item, requestOptions
 
 LiveTree.prototype.expandItem = function (itemId) {
     var tree = this;
-    var item = tree._getItem(itemId);
+    var item = tree.getItem(itemId);
     var search = false;
     if (item == null) {
         tree._requestItem(itemId, 2, tree._onExpandItemParentsReceived.bind(tree), { includeParents: true });
@@ -802,7 +840,7 @@ LiveTree.prototype.expandItem = function (itemId) {
 LiveTree.prototype._onExpandParentsOfItemReceived = function (item, requestOptions) {
     var tree = this;
     //alert("XXX _onExpandParentsOfItemReceived item.id=" + item.id);
-    var requestedItem = tree._getItem(requestOptions.itemId);
+    var requestedItem = tree.getItem(requestOptions.itemId);
     tree._expandItem(requestedItem.parent);
     tree._startAutoloads();
     tree._updateDisplay();	
@@ -810,7 +848,7 @@ LiveTree.prototype._onExpandParentsOfItemReceived = function (item, requestOptio
 
 LiveTree.prototype.expandParentsOfItem = function (itemId) {
     var tree = this;
-    var item = tree._getItem(itemId);
+    var item = tree.getItem(itemId);
     var search = false;
     if (item == null) {
         tree._requestItem(itemId, 1, tree._onExpandParentsOfItemReceived.bind(tree), { includeParents: true });
@@ -873,7 +911,7 @@ LiveTree.prototype._setupNewItemChildren = function (item) {
 
 LiveTree.prototype._addNewItems = function (newItem) {
     var tree = this;
-    var oldItem = tree._getItem(newItem.id);
+    var oldItem = tree.getItem(newItem.id);
     if (newItem.children != null && oldItem != null) {
         if (!tree._isLoaded(oldItem)) {
             // Old item has been seen, but its children were not loaded.
@@ -968,17 +1006,17 @@ LiveTree.prototype._reloadChildrenOfItem = function (item) {
 
 LiveTree.prototype.reloadChildrenOfItem = function (itemId) {
     var tree = this;
-    return tree._reloadChildrenOfItem(tree._getItem(itemId));    
+    return tree._reloadChildrenOfItem(tree.getItem(itemId));    
 }
 
 LiveTree.prototype.getActiveItem = function () {
     var tree = this;
-    return tree._getItem(tree._activeItemId);
+    return tree.getItem(tree._activeItemId);
 }
 
 LiveTree.prototype.isItemChildOf = function (itemId, parentItemId) {
     var tree = this;
-    var item = tree._getItem(itemId);
+    var item = tree.getItem(itemId);
     if (!item) {
         return false;
     }

@@ -2,7 +2,7 @@
 
 This list is not necessarily exhaustive.
 
-* Handle missing items (especially after search).
+* Handle missing items better (especially after search).
 * Test on IE 5.5, others.
 * Special effects:
   * Smooth scrolling when the tree changes its scrollbar position to bring items into view.
@@ -11,8 +11,9 @@ This list is not necessarily exhaustive.
 * Give some consideration to fall-backs if the browser does not support JavaScript or AJAX.
 * Implement checkboxes next to tree items as an option.
 * Truncate item names intelligently, and display tooltip when hovering that shows whole name
-* Ability to manipulate tree on the client side.
+* Ability to manipulate tree on the client side (through JavaScript and drag-and-drop).
 * Ability to force refreshing of folder's contents every time the folder is opened.
 * Pass initial data complete to a certain item so it doesn't need to search when opening to something deep in the tree.
 * A way to display an "empty folder".
 * A way to display multiple trees that have no parent or don't have a common parent.
+* A way for the server to provide extra data to the client for items, that can be used by event handlers to handle some items in different ways than others.

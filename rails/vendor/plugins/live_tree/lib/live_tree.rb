@@ -33,6 +33,7 @@ module LiveTree
         #   * <tt>:get_item_children_proc</tt> - proc object which, when called with an item, returns the item's children.  If not specified, the item's +children+ attribute is used.
         #   * <tt>:item_parent_attribute</tt> - name of model attribute that returns the item's parent.  If not specified, the item's <tt>parent</tt> attribute is used
         #   * <tt>:get_item_parent_proc</tt> - proc object which, when called with an item, returns the item's parent.  If not specified, the item's <tt>parent</tt> attribute is used
+        #   * <tt>:get_item_extra_data_proc</tt> - proc object which, when called with an item, returns a hash that contains extra item properties for use on the client.  Optional.  Each value in the hash should be a string that contains a JavaScript expression (i.e. JSON).
         #
         # Exactly one of <tt>:model</tt>, <tt>:model_class_name</tt>, or <tt>find_item_proc</tt> must be specified.
         #
@@ -81,11 +82,14 @@ module LiveTree
             id.kind_of?(Numeric) ? id.to_s : ("'" + escape_javascript(id.to_s) + "'");
         end
     
-        def _recurse_live_tree_data(item, depth, get_item_id_proc, get_item_name_proc, get_item_icon_proc, get_item_children_proc, get_item_parent_proc, special_child_id = nil, special_child_data = nil) #:nodoc:
+        def _recurse_live_tree_data(item, depth, get_item_id_proc, get_item_name_proc, get_item_icon_proc, get_item_children_proc, get_item_parent_proc, get_item_extra_data_proc, special_child_id = nil, special_child_data = nil) #:nodoc:
             result = "{id:" + _id_to_javascript(get_item_id_proc.call(item)) + ",name:'" + escape_javascript(get_item_name_proc.call(item).to_s) + "'"
             icon = get_item_icon_proc.call(item).to_s
             if icon.length > 0
                 result += ",icon:'" + escape_javascript(icon) + "'"
+            end
+            get_item_extra_data_proc.call(item).each do |k,v|
+                result += "," + LiveTreeHelper.live_tree_js_name(k) + ":" + v
             end
             if get_item_children_proc.call(item).size == 0
                 result += ",children:[]"
@@ -98,7 +102,7 @@ module LiveTree
                     if get_item_id_proc.call(child) == special_child_id
                         result += special_child_data
                     else
-                        result += _recurse_live_tree_data(child, depth == nil ? nil : depth - 1, get_item_id_proc, get_item_name_proc, get_item_icon_proc, get_item_children_proc, get_item_parent_proc, special_child_id, special_child_data)
+                        result += _recurse_live_tree_data(child, depth == nil ? nil : depth - 1, get_item_id_proc, get_item_name_proc, get_item_icon_proc, get_item_children_proc, get_item_parent_proc, get_item_extra_data_proc, special_child_id, special_child_data)
                     end
                 end
                 result += "]"
@@ -154,14 +158,19 @@ module LiveTree
             else
                 get_item_parent_proc = Proc.new { |x| x.parent }
             end
+            if options[:get_item_extra_data_proc] != nil
+                get_item_extra_data_proc = options[:get_item_extra_data_proc];
+            else
+                get_item_extra_data_proc = Proc.new { |x| {} }
+            end
             depth = params[:depth] == nil ? nil : params[:depth].to_i
             include_parents = params[:include_parents]
             root_item_id = params[:root_item_id]
             
-            result = _recurse_live_tree_data(item, depth, get_item_id_proc, get_item_name_proc, get_item_icon_proc, get_item_children_proc, get_item_parent_proc)
+            result = _recurse_live_tree_data(item, depth, get_item_id_proc, get_item_name_proc, get_item_icon_proc, get_item_children_proc, get_item_parent_proc, get_item_extra_data_proc)
             if include_parents
                 while get_item_parent_proc.call(item) != nil && (root_item_id == nil || get_item_id_proc.call(item) != root_item_id)
-                    result = _recurse_live_tree_data(get_item_parent_proc.call(item), 2, get_item_id_proc, get_item_name_proc, get_item_icon_proc, get_item_children_proc, get_item_parent_proc, get_item_id_proc.call(item), result)
+                    result = _recurse_live_tree_data(get_item_parent_proc.call(item), 2, get_item_id_proc, get_item_name_proc, get_item_icon_proc, get_item_children_proc, get_item_parent_proc, get_item_extra_data_proc, get_item_id_proc.call(item), result)
                     item = get_item_parent_proc.call(item)
                 end	
             end			
@@ -315,6 +324,7 @@ module LiveTree
     #   * <tt>:get_item_children_proc</tt> - proc object which, when called with an item, returns the item's children.  If not specified, the item's +children+ attribute is used.
     #   * <tt>:item_parent_attribute</tt> - name of model attribute that returns the item's parent.  If not specified, the item's <tt>parent</tt> attribute is used
     #   * <tt>:get_item_parent_proc</tt> - proc object which, when called with an item, returns the item's parent.  If not specified, the item's <tt>parent</tt> attribute is used
+    #   * <tt>:get_item_extra_data_proc</tt> - proc object which, when called with an item, returns a hash that contains extra item properties for use on the client.  Optional.  Each value in the hash should be a string that contains a JavaScript expression (i.e. JSON).
     def get_live_tree_data(item, options = {})
         render :inline => '<%= _get_live_tree_data(item, options, params) %>', :locals => { :item => item, :options => options }
     end

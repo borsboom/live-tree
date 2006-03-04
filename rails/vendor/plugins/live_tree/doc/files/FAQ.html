@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>File: FAQ</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <meta http-equiv="Content-Script-Type" content="text/javascript" />
+  <link rel="stylesheet" href=".././rdoc-style.css" type="text/css" media="screen" />
+  <script type="text/javascript">
+  // <![CDATA[
+
+  function popupCode( url ) {
+    window.open(url, "Code", "resizable=yes,scrollbars=yes,toolbar=no,status=no,height=150,width=400")
+  }
+
+  function toggleCode( id ) {
+    if ( document.getElementById )
+      elem = document.getElementById( id );
+    else if ( document.all )
+      elem = eval( "document.all." + id );
+    else
+      return false;
+
+    elemStyle = elem.style;
+    
+    if ( elemStyle.display != "block" ) {
+      elemStyle.display = "block"
+    } else {
+      elemStyle.display = "none"
+    }
+
+    return true;
+  }
+  
+  // Make codeblocks hidden by default
+  document.writeln( "<style type=\"text/css\">div.method-source-code { display: none }</style>" )
+  
+  // ]]>
+  </script>
+
+</head>
+<body>
+
+
+
+  <div id="fileHeader">
+    <h1>FAQ</h1>
+    <table class="header-table">
+    <tr class="top-aligned-row">
+      <td><strong>Path:</strong></td>
+      <td>FAQ
+      </td>
+    </tr>
+    <tr class="top-aligned-row">
+      <td><strong>Last Update:</strong></td>
+      <td>Sat Feb 25 13:29:33 Pacific Standard Time 2006</td>
+    </tr>
+    </table>
+  </div>
+  <!-- banner header -->
+
+  <div id="bodyContent">
+
+
+
+  <div id="contextContent">
+
+    <div id="description">
+      <h1><a href="../classes/LiveTree.html">LiveTree</a> Frequently Asked Questions</h1>
+<h3>Why am I getting the following error: <tt><a href="../classes/LiveTree.html">LiveTree</a> error: could not get data from server: HTTP error: 500</tt>?</h3>
+<p>
+This means the data retrieval action on the server is having some kind of
+problem. Take a look at the Rails server&#8217;s console output, and you
+should see a line that looks like this:
+</p>
+<pre>
+    127.0.0.1 - - [20/Feb/2006:16:29:50 Pacific Standard Time] &quot;GET /my_controller/tree_live_tree_data?item_id=1&amp;depth=3 HTTP/1.1&quot; 500 245
+</pre>
+<p>
+Copy-and-paste the part between <tt>GET</tt> and <tt>HTTP</tt>, with
+&quot;<tt><a href="http://localhost:3000">localhost:3000</a></tt>&quot;
+prepended, into your web browser&#8217;s address bar. For example, for the
+output line above, you would go to this URL:
+</p>
+<pre>
+    http://localhost:3000/my_controller/tree_live_tree_data?item_id=1&amp;depth=3
+</pre>
+<p>
+Now you should be able to see a detailed error message from the server that
+will hopefully shed light on what is going on. Looking at your
+<tt>development.log</tt> may also help.
+</p>
+<p>
+This assumes you are running Rails in development mode on port 3000 on your
+local workstation. You will have to adjust the URL in other conditions.
+</p>
+<h3>How do I display multiple trees without a root?</h3>
+<p>
+You need to give each tree a common parent in the database, and then use
+the <tt>hide_root_item</tt> parameter to <a
+href="../classes/LiveTree/LiveTreeHelper.html#M000002">LiveTree::LiveTreeHelper.live_tree</a>
+in your view to hide that common parent.
+</p>
+
+    </div>
+
+
+   </div>
+
+
+  </div>
+
+
+    <!-- if includes -->
+
+    <div id="section">
+
+
+
+
+
+      
+
+
+    <!-- if method_list -->
+
+
+  </div>
+
+
+<div id="validator-badges">
+  <p><small><a href="http://validator.w3.org/check/referer">[Validate]</a></small></p>
+</div>
+
+</body>
+</html>

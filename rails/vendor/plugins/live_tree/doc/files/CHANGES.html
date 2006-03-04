@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>File: CHANGES</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <meta http-equiv="Content-Script-Type" content="text/javascript" />
+  <link rel="stylesheet" href=".././rdoc-style.css" type="text/css" media="screen" />
+  <script type="text/javascript">
+  // <![CDATA[
+
+  function popupCode( url ) {
+    window.open(url, "Code", "resizable=yes,scrollbars=yes,toolbar=no,status=no,height=150,width=400")
+  }
+
+  function toggleCode( id ) {
+    if ( document.getElementById )
+      elem = document.getElementById( id );
+    else if ( document.all )
+      elem = eval( "document.all." + id );
+    else
+      return false;
+
+    elemStyle = elem.style;
+    
+    if ( elemStyle.display != "block" ) {
+      elemStyle.display = "block"
+    } else {
+      elemStyle.display = "none"
+    }
+
+    return true;
+  }
+  
+  // Make codeblocks hidden by default
+  document.writeln( "<style type=\"text/css\">div.method-source-code { display: none }</style>" )
+  
+  // ]]>
+  </script>
+
+</head>
+<body>
+
+
+
+  <div id="fileHeader">
+    <h1>CHANGES</h1>
+    <table class="header-table">
+    <tr class="top-aligned-row">
+      <td><strong>Path:</strong></td>
+      <td>CHANGES
+      </td>
+    </tr>
+    <tr class="top-aligned-row">
+      <td><strong>Last Update:</strong></td>
+      <td>Wed Mar 01 12:00:20 Pacific Standard Time 2006</td>
+    </tr>
+    </table>
+  </div>
+  <!-- banner header -->
+
+  <div id="bodyContent">
+
+
+
+  <div id="contextContent">
+
+    <div id="description">
+      <h3>0.1.3 - ???</h3>
+<p>
+Client:
+</p>
+<ul>
+<li><b>BREAKING</b> <b>CHANGE</b>: Items no longer have <tt>isLeaf</tt>,
+<tt>isLoaded</tt>, and <tt>isExpanded</tt> attributes. Use
+<tt>tree.isLeaf(itemId)</tt>, <tt>tree.isLoaded(itemId)</tt>, and
+<tt>tree.isExpanded(itemId)</tt> instead.
+
+</li>
+<li><b>BREAKING</b> <b>CHANGE</b>: CSS: Changed <tt>live_tree_item_icon</tt>
+class name to <tt>live_tree_item_branching_icon</tt>.
+
+</li>
+<li><b>BREAKING</b> <b>CHANGE</b>: CSS: Changed
+<tt>live_tree_branch_expand_collapse_link</tt> class name to
+<tt>live_tree_branching_link</tt>.
+
+</li>
+<li>Support for reloading the children of a branch using
+<tt>reloadChildrenOfItem()</tt> method.
+
+</li>
+<li>If you right-click an item, a context menu appears that will refresh that
+item&#8217;s children.
+
+</li>
+<li>Support for items with icons through <tt>icon</tt> property of item.
+
+</li>
+<li>Support for persistent state using <tt>getState()</tt> method and
+<tt>initialState</tt> option.
+
+</li>
+<li>Support for capturing right-clicks on an item using the
+<tt>onContextMenu</tt> event.
+
+</li>
+<li>Original JavaScript <tt>event</tt> objects get passed to <a
+href="../classes/LiveTree.html">LiveTree</a> event handlers.
+
+</li>
+<li>Added <tt>getActiveItem()</tt> method.
+
+</li>
+<li>Added <tt>isItemChildOf()</tt> method.
+
+</li>
+<li>Added <tt>notLoadedIconHtml</tt> and <tt>notLoadedItemHtml</tt> options.
+
+</li>
+</ul>
+<p>
+Rails Server:
+</p>
+<ul>
+<li>Support for items with icons through the <tt>:render_item_icon</tt> option.
+
+</li>
+<li>Support client&#8217;s new <tt>onContextMenu</tt> option through
+<tt>:on_context_menu</tt> option.
+
+</li>
+<li>Added the following parameters for <a
+href="../classes/LiveTree/ClassMethods.html#M000005">LiveTree::ClassMethods.live_tree</a>:
+
+<ul>
+<li><tt>:find_item_method</tt>
+
+</li>
+<li><tt>:item_id_attribute</tt>
+
+</li>
+<li><tt>:item_name_attribute</tt>
+
+</li>
+<li><tt>:render_item_name</tt>
+
+</li>
+<li><tt>:render_item_icon</tt>
+
+</li>
+<li><tt>:item_children_attribute</tt>
+
+</li>
+<li><tt>:item_parent_attribute</tt>
+
+</li>
+</ul>
+</li>
+</ul>
+<p>
+Demos:
+</p>
+<ul>
+<li>Added file system browser demo.
+
+</li>
+<li>Added persistant state demo.
+
+</li>
+<li>Added links to relevant source files in all demos.
+
+</li>
+</ul>
+<h3>0.1.2 - January 29, 2006</h3>
+<p>
+Client:
+</p>
+<ul>
+<li>Better error handling.
+
+</li>
+<li>Rework of display system.
+
+</li>
+<li>When loading a folder, &quot;Loading&#8230;&quot; is displayed where the
+children will go.
+
+</li>
+<li>Support IDs with special characters.
+
+</li>
+<li>Support for Windows-like expand/collapse icons
+
+</li>
+</ul>
+<p>
+Rails Server:
+</p>
+<ul>
+<li>Support non-numeric IDs.
+
+</li>
+<li>Ability to easily serve data from non-ActiveRecord models.
+
+</li>
+</ul>
+<p>
+Demos:
+</p>
+<ul>
+<li>Added demos for nested set, alternate field names, non-model data, and
+custom data action.
+
+</li>
+</ul>
+<p>
+Documentation:
+</p>
+<ul>
+<li>Added documentation for working with <tt>acts_as_nested_set</tt> models,
+non-ActiveRecord model data, and custom data actions.
+
+</li>
+</ul>
+<h3>0.1.1 - January 16, 2006</h3>
+<p>
+Rails Server:
+</p>
+<ul>
+<li>Packaged code as a plugin.
+
+</li>
+<li>Added <tt>get_item_children_proc</tt> option.
+
+</li>
+<li>Added <tt>get_item_parent_proc</tt> option.
+
+</li>
+</ul>
+<h3>0.1 - July 13, 2005</h3>
+<ul>
+<li>Initial version
+
+</li>
+</ul>
+
+    </div>
+
+
+   </div>
+
+
+  </div>
+
+
+    <!-- if includes -->
+
+    <div id="section">
+
+
+
+
+
+      
+
+
+    <!-- if method_list -->
+
+
+  </div>
+
+
+<div id="validator-badges">
+  <p><small><a href="http://validator.w3.org/check/referer">[Validate]</a></small></p>
+</div>
+
+</body>
+</html>

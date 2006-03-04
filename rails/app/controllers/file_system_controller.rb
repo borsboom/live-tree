@@ -6,7 +6,8 @@ class FileSystemController < ApplicationController
     live_tree :fstree,
               :find_item_proc => Proc.new { |x| FileSystemItem.new(x, RAILS_ROOT) },
               :render_item_name => { :partial => "item_name" },
-              :render_item_icon => { :partial => "item_icon" }
+              :render_item_icon => { :partial => "item_icon" },
+              :get_item_extra_data_proc => Proc.new { |item| item.directory? ? {:is_branch => 'true'} : {} }
               
     def index
         if params['initial_file']
