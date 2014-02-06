@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="Live-tree : JavaScript/DHTML tree (hierarchical list) widget that loads data asynchronously as-needed, with Ruby on Rails bindings." />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Live-tree</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/borsboom/live-tree">View on GitHub</a>
+
+          <h1 id="project_title">Live-tree</h1>
+          <h2 id="project_tagline">JavaScript/DHTML tree (hierarchical list) widget that loads data asynchronously as-needed, with Ruby on Rails bindings.</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/borsboom/live-tree/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/borsboom/live-tree/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <p><strong>Project status</strong>: abandoned.  This isn't compatible with recent versions of Ruby On Rails and there are now many other options that work better.
+<br><strong>Developed:</strong> 2006</p>
+
+<p>LiveTree implements a JavaScript/DHTML tree (hierarchical list) widget that loads data asynchronously as-needed (using <a href="http://www.adaptivepath.com/publications/essays/archives/000385.php">AJAX</a>). This makes it ideal for cases where the dataset is too large to load to the browser all at once. Data can be provided in the HTML page as well, in which case no asynchronous loading is needed, making this widget suitable for standalone client-side use.</p>
+
+<p>This project was started to learn Ruby, Ruby on Rails, and dynamic HTML techniques.  I went on to refine it for general use, but then started a new job that prevented me from spending any more time on it.</p>
+
+<p>
+Note: I'm afraid that this project is essentially abandoned.  While I would love to do more work on LiveTree and with Rails in general, my life has gotten busier and there just isn't time.  I won't be much use answering questions about using it either because it's been so long since I've looked at the code.  If anyone would be interested in taking over the project, I have some half-finished and buggy code for some new features, as well as a few patches that users have sent, that I would be happy to provide.  Also, if anyone has good suggestions for alternative tree controls for Rails that I can link to here, please send them in.
+</p>
+
+<p>LiveTree consists of two components: client-side JavaScript code that runs in the user’s browser which displays and allows the user to navigate the tree, and a server component that provides data to the client. The client-server protocol is very simple, which means server components can be easily created for just about any web server configuration with minimal effort. Presently, the only existing server component is for <a href="http://www.rubyonrails.org/">Ruby On Rails</a>.</p>
+
+<h3>
+<a name="features" class="anchor" href="#features"><span class="octicon octicon-link"></span></a>Features</h3>
+
+<p></p><ul>
+<li>Can load data asynchronously as-needed (so only the parts of the tree the
+user needs are sent to the client).
+
+<p></p>
+</li>
+<li>Ideal for large/deep data sets (such as navigating a file system, or
+complete table of contents of a book).
+
+<p></p>
+</li>
+<li>Intelligently pre-loads parts of the tree that it anticipates the user will
+want to look at, so delays for the user are minimized.
+
+<p></p>
+</li>
+<li>Customizable using CSS, snippets of HTML, event handlers, and many options.
+
+<p></p>
+</li>
+<li>Controllable from JavaScript.
+
+<p></p>
+</li>
+<li>Supports deep linking - can jump to a part of the tree that has not been
+loaded yet, and it will search for that item and load its parents.
+
+<p></p>
+</li>
+<li>Supports an "active" (highlighted) item.
+
+<p></p>
+</li>
+
+<p></p>
+<li>Automatically scrolls the tree so that what the user is interested in is on
+the screen.
+
+<p></p>
+</li>
+<li>Tight integration with <a href="http://www.rubyonrails.org/">Ruby on Rails</a>.  Can Use <tt>acts_as_tree</tt> or <tt>acts_as_nested_set</tt> model for
+data.
+
+<p></p>
+</li>
+<li>Minimal server requirements.
+</li>
+
+<p></p>
+<li>Can be used standalone (client-side only without server support).
+
+<p></p>
+</li>
+
+<h3>
+<a name="documentation" class="anchor" href="#documentation"><span class="octicon octicon-link"></span></a>Documentation</h3>
+
+<p>See the <a href="http://s3.amazonaws.com/borsboom-downloads/live_tree/doc/index.html">RDocs</a> for more information.  In particular:</p>
+
+<p></p>
+<ul>
+<li>
+            <a href="http://s3.amazonaws.com/borsboom-downloads/live_tree/doc/files/README.html">README</a> - Introduction to LiveTree.</li>
+
+<p></p>
+<li>
+            <a href="http://s3.amazonaws.com/borsboom-downloads/live_tree/doc/files/FAQ.html">FAQ</a> - Answers to frequently asked questions.</li>
+</ul>
+</ul>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Live-tree maintained by <a href="https://github.com/borsboom">borsboom</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
